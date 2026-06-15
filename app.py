@@ -1,6 +1,6 @@
 """
 Heart Disease Prediction – Explainable AI Dashboard
-CDAM . Chuka University | Python for Data Science & Machine Learning
+CDAM . Chuka University | Certificate in Python for Data Science & Machine Learning
 """
 
 import streamlit as st
@@ -255,7 +255,7 @@ with st.sidebar:
         </div>
         <hr style='border-color:#21262d; margin:14px 0 6px;'>
         <div style='font-size:0.72rem; color:#8b949e;'>
-            Chuka University · CDAM<br>MSc Applied Statistics
+            CDAM AI Hub <br> Python for Data Science and ML
         </div>
     </div>
     """, unsafe_allow_html=True)
