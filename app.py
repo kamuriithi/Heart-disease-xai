@@ -245,12 +245,8 @@ with st.sidebar:
     
     st.markdown("""
     <div style='text-align:center; padding: 16px 0 8px;'>
-        <div style='font-size:0.75rem; color:#8b949e; margin-top:2px;'>
-            Heart Disease Prediction System
-        </div>
-        <hr style='border-color:#21262d; margin:14px 0 6px;'>
-        <div style='font-size:0.72rem; color:#8b949e;'>
-            CDAM AI Hub <br> Python for Data Science and ML
+        <div style='font-size:0.88rem; color:#8b949e;'>
+            CDAM AI Hub <br> Python for Data Science and Machine Learning
         </div>
     </div>
                 
