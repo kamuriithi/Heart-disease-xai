@@ -510,8 +510,12 @@ elif page == "🔮 Individual Prediction":
             st.markdown('<div class="section-header">🧠 SHAP Explanation</div>', unsafe_allow_html=True)
             if sel_model in shap_values:
                 sv_data = shap_values[sel_model]
-                sv_arr  = np.array(sv_data["values"])
-                base_v  = sv_data["base_value"]
+                sv_arr  = np.array(sv_data["values"], dtype=float)
+                if sv_arr.ndim == 3:
+                    sv_arr = sv_arr[:, :, 1]
+                elif sv_arr.ndim == 1:
+                    sv_arr = sv_arr.reshape(1, -1)
+                base_v  = float(sv_data["base_value"])
  
                 # Use first test sample as reference proxy for SHAP waterfall
                 # Flatten to 1-D array of scalars regardless of storage format
@@ -710,25 +714,30 @@ elif page == "📈 ROC Analysis":
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "🧠 Explainable AI (SHAP)":
     st.markdown('<h2 style="color:#e6edf3;">🧠 Explainable AI — SHAP Analysis</h2>', unsafe_allow_html=True)
-
+ 
     shap_model = st.selectbox("Select Model for SHAP Analysis", list(shap_values.keys()), index=0)
-
+ 
     sv_data  = shap_values[shap_model]
-    sv_arr   = np.array(sv_data["values"])
-    base_val = sv_data["base_value"]
-
+    sv_arr   = np.array(sv_data["values"], dtype=float)
+    # If stored as 3D (samples, features, classes) squeeze to 2D
+    if sv_arr.ndim == 3:
+        sv_arr = sv_arr[:, :, 1]
+    elif sv_arr.ndim == 1:
+        sv_arr = sv_arr.reshape(1, -1)
+    base_val = float(sv_data["base_value"])
+ 
     tab1, tab2, tab3, tab4 = st.tabs([
         "📊 Feature Importance", "🐝 SHAP Beeswarm",
         "🌊 Individual Waterfall", "🔗 Dependence Plot"
     ])
-
+ 
     # ── Tab 1: Feature Importance ──────────────────────────────────────────────
     with tab1:
         st.markdown('<div class="section-header">📊 Mean |SHAP| Feature Importance</div>',
                     unsafe_allow_html=True)
-        mean_abs = np.abs(sv_arr).mean(axis=0)
-        fi_sorted = sorted(zip(feature_names, mean_abs), key=lambda x: x[1])
-
+        mean_abs = np.abs(sv_arr).mean(axis=0).astype(float).flatten()
+        fi_sorted = sorted(zip(feature_names, mean_abs.tolist()), key=lambda x: float(x[1]))
+ 
         col_fi1, col_fi2 = st.columns([3, 2])
         with col_fi1:
             fig_fi, ax_fi = plt.subplots(figsize=(7, 5))
@@ -738,35 +747,35 @@ elif page == "🧠 Explainable AI (SHAP)":
             ax_fi.set_xlabel("Mean |SHAP Value|", fontsize=10)
             ax_fi.set_title(f"Global Feature Importance — {shap_model}", fontsize=11, pad=8)
             apply_dark_style(fig_fi)
-            ax_fi.xaxis.grid(True, color='#21262d', linewidth=0.5)
+            ax_fi.xaxis.grid(True, color='#b8d8ea', linewidth=0.5)
             plt.tight_layout()
             st.pyplot(fig_fi, use_container_width=True)
             plt.close(fig_fi)
-
+ 
         with col_fi2:
             fi_df = pd.DataFrame(
-                [(f, f"{v:.4f}") for f, v in sorted(zip(feature_names, mean_abs),
-                                                      key=lambda x: x[1], reverse=True)],
+                [(f, f"{float(v):.4f}") for f, v in sorted(zip(feature_names, mean_abs.tolist()),
+                                                      key=lambda x: float(x[1]), reverse=True)],
                 columns=["Feature", "Mean |SHAP|"]
             )
             fi_df.insert(0, "Rank", range(1, len(fi_df)+1))
             st.dataframe(fi_df, use_container_width=True, hide_index=True)
             st.markdown("""
-            <div class='info-box' style='font-size:.82rem;color:#8b949e;margin-top:10px;'>
+            <div class='info-box' style='font-size:.82rem;color:#3a7ca5;margin-top:10px; background:#ffffff; border:1px solid #a0cfe8;'>
                 <strong>Mean |SHAP|</strong> = average absolute contribution of each feature
                 across all test patients. Higher = more influential in model decisions.
             </div>""", unsafe_allow_html=True)
-
+ 
     # ── Tab 2: Beeswarm ─────────────────────────────────────────────────────────
     with tab2:
         st.markdown('<div class="section-header">🐝 SHAP Beeswarm (Summary) Plot</div>',
                     unsafe_allow_html=True)
-
+ 
         # Sort features by mean|shap|
         order = np.argsort(np.abs(sv_arr).mean(axis=0))
         sv_ord = sv_arr[:, order]
         fn_ord = [feature_names[i] for i in order]
-
+ 
         fig_bs, ax_bs = plt.subplots(figsize=(9, 6))
         for j, (fname, sv_col) in enumerate(zip(fn_ord, sv_ord.T)):
             raw_feat = X_test[:, order[j]]
@@ -785,20 +794,20 @@ elif page == "🧠 Explainable AI (SHAP)":
         ax_bs.set_xlabel("SHAP Value", fontsize=11)
         ax_bs.set_title(f"SHAP Beeswarm Plot — {shap_model}", fontsize=12, pad=10)
         apply_dark_style(fig_bs)
-        ax_bs.xaxis.grid(True, color='#21262d', linewidth=0.4)
+        ax_bs.xaxis.grid(True, color='#b8d8ea', linewidth=0.4)
         plt.tight_layout()
         st.pyplot(fig_bs, use_container_width=True)
         plt.close(fig_bs)
-
+ 
         st.markdown("""
-        <div class='info-box' style='font-size:.85rem;line-height:1.7;color:#c9d1d9;'>
+        <div class='info-box' style='font-size:.85rem;line-height:1.7;color:#0a2540; background:#ffffff; border:1px solid #a0cfe8;'>
             🔴 <strong>Red dots</strong> = high feature value &nbsp;|&nbsp;
             🔵 <strong>Blue dots</strong> = low feature value<br>
             Dots to the <strong>right of zero</strong> increase the predicted risk.
             Dots to the <strong>left</strong> decrease it.
             The vertical spread shows distribution over all test patients.
         </div>""", unsafe_allow_html=True)
-
+ 
     # ── Tab 3: Individual Waterfall ──────────────────────────────────────────────
     with tab3:
         st.markdown('<div class="section-header">🌊 Individual Patient Waterfall</div>',
@@ -808,12 +817,12 @@ elif page == "🧠 Explainable AI (SHAP)":
         patient_idx = st.slider("Select Patient Index", 0, n_patients - 1, 0)
         true_label  = y_test[patient_idx]
         sample_sv   = sv_arr[patient_idx]
-
+ 
         pairs   = sorted(zip(feature_names, sample_sv), key=lambda x: x[1])
         f_names = [p[0] for p in pairs]
         f_vals  = [p[1] for p in pairs]
         colors_wfall = ["#3fb950" if v < 0 else "#f85149" for v in f_vals]
-
+ 
         fig_wfall, ax_wfall = plt.subplots(figsize=(8, 5.5))
         ax_wfall.barh(f_names, f_vals, color=colors_wfall, edgecolor='none', height=0.6)
         ax_wfall.axvline(0, color='#8b949e', linewidth=0.8, linestyle='--')
@@ -824,34 +833,34 @@ elif page == "🧠 Explainable AI (SHAP)":
         p_pos = mpatches.Patch(color='#f85149', label='Increases Risk')
         p_neg = mpatches.Patch(color='#3fb950', label='Decreases Risk')
         ax_wfall.legend(handles=[p_pos, p_neg], fontsize=9,
-                        facecolor='#161b22', edgecolor='#30363d', labelcolor='#c9d1d9')
+                        facecolor='#ffffff', edgecolor='#a0cfe8', labelcolor='#0a2540')
         apply_dark_style(fig_wfall)
-        ax_wfall.xaxis.grid(True, color='#21262d', linewidth=0.4)
+        ax_wfall.xaxis.grid(True, color='#b8d8ea', linewidth=0.4)
         plt.tight_layout()
         st.pyplot(fig_wfall, use_container_width=True)
         plt.close(fig_wfall)
-
+ 
         st.markdown(f"""
-        <div class='info-box' style='font-size:.85rem;color:#8b949e;'>
+        <div class='info-box' style='font-size:.85rem;color:#3a7ca5; background:#ffffff; border:1px solid #a0cfe8;'>
             Model baseline (E[f(X)]): <strong style='color:#58a6ff;'>{base_val:.4f}</strong>
             &nbsp;|&nbsp; Sum of SHAP contributions shifts prediction from baseline to final output.
         </div>""", unsafe_allow_html=True)
-
+ 
     # ── Tab 4: Dependence Plot ────────────────────────────────────────────────
     with tab4:
         st.markdown('<div class="section-header">🔗 SHAP Dependence Plot</div>', unsafe_allow_html=True)
         feat_sel = st.selectbox("Select Feature", feature_names, index=feature_names.index("Age"))
         fi       = feature_names.index(feat_sel)
-
+ 
         # Align lengths — sv_arr may be shorter than X_test due to KernelExplainer padding
         n_dep      = min(len(X_test), len(sv_arr))
         feat_vals  = X_test[:n_dep, fi]
         shap_for_f = sv_arr[:n_dep, fi]
-
+ 
         # Colour by highest-interaction feature (Ca)
         color_fi   = feature_names.index("Ca")
         color_vals = X_test[:n_dep, color_fi]
-
+ 
         fig_dep, ax_dep = plt.subplots(figsize=(8, 5))
         sc = ax_dep.scatter(feat_vals, shap_for_f, c=color_vals,
                             cmap='RdYlGn_r', s=35, alpha=0.75, linewidths=0)
@@ -864,18 +873,17 @@ elif page == "🧠 Explainable AI (SHAP)":
         ax_dep.set_ylabel("SHAP Value", fontsize=11)
         ax_dep.set_title(f"SHAP Dependence: {feat_sel} — {shap_model}", fontsize=12, pad=10)
         apply_dark_style(fig_dep)
-        ax_dep.grid(True, color='#21262d', linewidth=0.4)
+        ax_dep.grid(True, color='#b8d8ea', linewidth=0.4)
         plt.tight_layout()
         st.pyplot(fig_dep, use_container_width=True)
         plt.close(fig_dep)
-
+ 
         st.markdown(f"""
-        <div class='info-box' style='font-size:.85rem;line-height:1.7;color:#c9d1d9;'>
+        <div class='info-box' style='font-size:.85rem;line-height:1.7;color:#0a2540; background:#ffffff; border:1px solid #a0cfe8;'>
             X-axis: scaled values of <strong>{feat_sel}</strong>.
             Y-axis: SHAP contribution to predicted risk. Points above zero push the prediction
             higher; points below reduce it. Colour encodes a secondary interaction feature (Ca).
         </div>""", unsafe_allow_html=True)
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 6 — DATA EXPLORER
