@@ -237,18 +237,19 @@ def apply_dark_style(fig, ax_list=None):
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown("""
-    <div style='text-align:center; padding: 16px 0 24px 0;'>
-    """, unsafe_allow_html=True)
-    
-    # Display Chuka University Logo
-    st.image("logo.png", use_container_width=True)
+    <div style='text-align:center; padding: 16px 0 8px;'>
+        <div style='font-size:2.8rem'>🫀</div>
+        <div style='font-size:1.15rem; font-weight:700; color:#58a6ff; margin-top:4px;'>
+            CardioXAI
+        </div>
         <div style='font-size:0.75rem; color:#8b949e; margin-top:2px;'>
             Heart Disease Prediction System
         </div>
         <hr style='border-color:#21262d; margin:14px 0 6px;'>
         <div style='font-size:0.72rem; color:#8b949e;'>
-            CDAM AI Hub <br> Python for Data Science and Machine Learning
+            CDAM AI Hub <br> Python for Data Science and ML
         </div>
+    </div>
                 
     """, unsafe_allow_html=True)
 
