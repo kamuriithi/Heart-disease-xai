@@ -15,71 +15,101 @@ warnings.filterwarnings("ignore")
 # ── Page config ────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-/* ── Global ── */
+/* ── Base & fonts ── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
+/* ── Background ── */
+.stApp { background: #0d1117; color: #e6edf3; }
+
 /* ── Sidebar ── */
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-    border-right: 1px solid #334155;
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+    border-right: 1px solid #21262d;
 }
-[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
-[data-testid="stSidebar"] .stRadio label { 
-    padding: 10px 14px; border-radius: 8px; 
-    transition: background 0.2s; display: block; cursor: pointer;
+section[data-testid="stSidebar"] .stRadio label {
+    color: #c9d1d9 !important;
+    font-size: 0.95rem;
+    padding: 6px 0;
 }
-[data-testid="stSidebar"] .stRadio label:hover { background: #334155; }
 
+/* ── Metric cards ── */
 .metric-card {
-    background: linear-gradient(135deg, #6A0DAD 0%, #3B0764 100%);
-    border: 1px solid #9333EA;
+    background: linear-gradient(135deg, #161b22 0%, #1c2128 100%);
+    border: 1px solid #30363d;
     border-radius: 12px;
-    padding: 20px;
+    padding: 20px 24px;
     text-align: center;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    transition: transform 0.2s;
+    transition: transform .2s, box-shadow .2s;
 }
-
-.metric-card:hover {
-    transform: translateY(-2px);
+.metric-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.metric-card .metric-value {
+    font-size: 2.2rem; font-weight: 700; margin: 6px 0 2px;
 }
-
-.metric-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #F5F3FF;
+.metric-card .metric-label {
+    font-size: 0.8rem; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;
 }
-
-.metric-label {
-    font-size: 0.85rem;
-    color: #E9D5FF;
-    margin-top: 4px;
-}
-
-/* ── Risk badges ── */
-.risk-low    { background:#064e3b; color:#34d399; border:1px solid #34d399; padding:8px 20px; border-radius:20px; font-weight:600; }
-.risk-mild   { background:#713f12; color:#fbbf24; border:1px solid #fbbf24; padding:8px 20px; border-radius:20px; font-weight:600; }
-.risk-mod    { background:#7c2d12; color:#f97316; border:1px solid #f97316; padding:8px 20px; border-radius:20px; font-weight:600; }
-.risk-high   { background:#450a0a; color:#f87171; border:1px solid #f87171; padding:8px 20px; border-radius:20px; font-weight:600; }
+.metric-card .metric-delta { font-size: 0.75rem; margin-top: 4px; }
 
 /* ── Section headers ── */
-.section-title { font-size:1.4rem; font-weight:700; color:#38bdf8; 
-                 border-bottom:2px solid #334155; padding-bottom:8px; margin-bottom:16px; }
-
-/* ── Prediction box ── */
-.pred-box {
-    border-radius: 14px; padding: 24px; text-align: center;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+.section-header {
+    font-size: 1.35rem; font-weight: 600;
+    color: #e6edf3;
+    border-left: 4px solid #238636;
+    padding-left: 12px;
+    margin: 24px 0 14px;
 }
-.pred-box h2 { margin:0; font-size: 1.6rem; }
 
-/* ── Recommendation card ── */
-.rec-card {
-    border-left: 4px solid; border-radius: 8px; padding: 16px 20px;
-    margin: 12px 0; background: #1e293b;
+/* ── Risk badge ── */
+.risk-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: .5px;
 }
-.stAlert { border-radius: 10px !important; }
+
+/* ── Probability bar ── */
+.prob-bar-wrap { background:#21262d; border-radius:999px; height:18px; width:100%; }
+.prob-bar-fill { height:18px; border-radius:999px; transition: width .6s; }
+
+/* ── Info box ── */
+.info-box {
+    background: #1c2128; border: 1px solid #30363d; border-radius: 10px;
+    padding: 16px 20px; margin: 10px 0;
+}
+
+/* ── Feature table row alternating ── */
+.dataframe tbody tr:nth-child(even) { background-color: #161b22 !important; }
+.dataframe tbody tr:nth-child(odd)  { background-color: #0d1117 !important; }
+
+/* ── Button ── */
+div.stButton > button {
+    background: linear-gradient(135deg, #238636, #2ea043);
+    color: white; font-weight: 600; border: none;
+    border-radius: 8px; padding: 10px 28px;
+    font-size: 1rem; cursor: pointer;
+    transition: opacity .2s;
+}
+div.stButton > button:hover { opacity: .85; }
+
+/* ── Select / inputs ── */
+.stSelectbox > div > div, .stNumberInput > div > div {
+    background: #161b22 !important; border-color: #30363d !important;
+    color: #e6edf3 !important;
+}
+
+/* ── Tabs ── */
+button[data-baseweb="tab"] { color: #8b949e !important; }
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: #58a6ff !important;
+    border-bottom-color: #58a6ff !important;
+}
+
+/* ── Divider ── */
+hr { border-color: #21262d; }
 </style>
 """, unsafe_allow_html=True)
 
