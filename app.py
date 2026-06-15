@@ -972,7 +972,7 @@ elif page == "📖 About & Methods":
     st.markdown('<h2 style="color:#e6edf3;">📖 About This System & Methodology</h2>',
                 unsafe_allow_html=True)
  # Display Chuka University Logo
-    st.image("logo.png", use_container_width=True)
+    st.image("dS_lifecycle.png", use_container_width=True)
 
     col1, col2 = st.columns(2)
 
