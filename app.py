@@ -237,6 +237,13 @@ def apply_dark_style(fig, ax_list=None):
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown("""
+    <div style='text-align:center; padding: 16px 0 24px 0;'>
+    """, unsafe_allow_html=True)
+    
+    # Display Chuka University Logo
+    st.image("logo.png", use_container_width=True)
+    
+    st.markdown("""
     <div style='text-align:center; padding: 16px 0 8px;'>
         <div style='font-size:2.8rem'>🫀</div>
         <div style='font-size:1.15rem; font-weight:700; color:#58a6ff; margin-top:4px;'>
