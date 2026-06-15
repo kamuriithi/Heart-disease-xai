@@ -249,7 +249,7 @@ with st.sidebar:
         <div style='font-size:0.72rem; color:#8b949e;'>
             CDAM AI Hub <br> Python for Data Science and Machine Learning
         </div>
-    </div>
+                
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
