@@ -245,7 +245,7 @@ with st.sidebar:
     
     st.markdown("""
     <div style='text-align:center; padding: 16px 0 8px;'>
-        <div style='font-size:0.88rem; color:#8b949e;'>
+        <div style='font-size:0.84rem; color:#8b949e;'>
             CDAM AI Hub <br> Python for Data Science and Machine Learning
         </div>
     </div>
@@ -301,7 +301,7 @@ if page == "🏠 Dashboard Overview":
             </span>
             <span style='background:#161b22;border:1px solid #30363d;border-radius:20px;
                 padding:4px 14px;font-size:0.78rem;color:#8b949e;margin:0 4px;'>
-                📚 Python for Data Science and Machine Learning
+                📚 Mastery of Python for Data Science and Machine Learning
             </span>
         </div>
     </div>
