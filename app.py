@@ -805,7 +805,8 @@ elif page == "🧠 Explainable AI (SHAP)":
     with tab3:
         st.markdown('<div class="section-header">🌊 Individual Patient Waterfall</div>',
                     unsafe_allow_html=True)
-        n_patients = sv_arr.shape[0]
+        # Limit slider to rows where SHAP values are valid (non-padded)
+        n_patients = min(sv_arr.shape[0], len(y_test))
         patient_idx = st.slider("Select Patient Index", 0, n_patients - 1, 0)
         true_label  = y_test[patient_idx]
         sample_sv   = sv_arr[patient_idx]
@@ -844,16 +845,18 @@ elif page == "🧠 Explainable AI (SHAP)":
         feat_sel = st.selectbox("Select Feature", feature_names, index=feature_names.index("Age"))
         fi       = feature_names.index(feat_sel)
 
-        feat_vals  = X_test[:, fi]
-        shap_for_f = sv_arr[:, fi]
+        # Align lengths — sv_arr may be shorter than X_test due to KernelExplainer padding
+        n_dep      = min(len(X_test), len(sv_arr))
+        feat_vals  = X_test[:n_dep, fi]
+        shap_for_f = sv_arr[:n_dep, fi]
 
         # Colour by highest-interaction feature (Ca)
         color_fi   = feature_names.index("Ca")
-        color_vals = X_test[:, color_fi]
+        color_vals = X_test[:n_dep, color_fi]
 
         fig_dep, ax_dep = plt.subplots(figsize=(8, 5))
         sc = ax_dep.scatter(feat_vals, shap_for_f, c=color_vals,
-                            cmap='RdYlGn_r', s=35, alpha=0.75, edgecolors='none')
+                            cmap='RdYlGn_r', s=35, alpha=0.75, linewidths=0)
         cb = fig_dep.colorbar(sc, ax=ax_dep)
         cb.set_label("Ca (# Vessels)", color='#c9d1d9', fontsize=9)
         cb.ax.yaxis.set_tick_params(color='#8b949e')
