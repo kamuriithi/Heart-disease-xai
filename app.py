@@ -383,7 +383,7 @@ if page == "🏠 Dashboard Overview":
         st.dataframe(pd.DataFrame(lb), use_container_width=True, hide_index=True)
 
         # Risk categories
-        st.markdown('<div class="section-header">🚦 Risk Category Guide</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🚦 Risk Stratification Guide</div>', unsafe_allow_html=True)
         risk_data = [
             ("🟢 Low Risk",      "< 25%",     "Routine monitoring; healthy lifestyle"),
             ("🟡 Mild Risk",     "25% – 50%", "Clinical follow-up; lifestyle modification"),
