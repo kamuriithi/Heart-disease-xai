@@ -255,7 +255,7 @@ with st.sidebar:
         </div>
         <hr style='border-color:#21262d; margin:14px 0 6px;'>
         <div style='font-size:0.72rem; color:#8b949e;'>
-            CDAM AI Hub <br> Python for Data Science and ML
+            CDAM AI Hub <br> Python for Data Science and Machine Learning
         </div>
     </div>
     """, unsafe_allow_html=True)
