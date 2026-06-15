@@ -25,27 +25,27 @@ st.markdown("""
 <style>
 /* ── Base & fonts ── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
+ 
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-
+ 
 /* ── Background ── */
-.stApp { background: #0d1117; color: #e6edf3; }
-
+.stApp { background: #e0f4ff; color: #0a2540; }
+ 
 /* ── Sidebar ── */
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
-    border-right: 1px solid #21262d;
+    background: linear-gradient(180deg, #b8e4f9 0%, #e0f4ff 100%);
+    border-right: 1px solid #a0cfe8;
 }
 section[data-testid="stSidebar"] .stRadio label {
-    color: #c9d1d9 !important;
+    color: #0a2540 !important;
     font-size: 0.95rem;
     padding: 6px 0;
 }
-
+ 
 /* ── Metric cards ── */
 .metric-card {
-    background: linear-gradient(135deg, #161b22 0%, #1c2128 100%);
-    border: 1px solid #30363d;
+    background: linear-gradient(135deg, #ffffff 0%, #d4eeff 100%);
+    border: 1px solid #a0cfe8;
     border-radius: 12px;
     padding: 20px 24px;
     text-align: center;
@@ -56,19 +56,19 @@ section[data-testid="stSidebar"] .stRadio label {
     font-size: 2.2rem; font-weight: 700; margin: 6px 0 2px;
 }
 .metric-card .metric-label {
-    font-size: 0.8rem; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;
+    font-size: 0.8rem; color: #3a7ca5; text-transform: uppercase; letter-spacing: 1px;
 }
-.metric-card .metric-delta { font-size: 0.75rem; margin-top: 4px; }
-
+.metric-card .metric-delta { font-size: 0.75rem; margin-top: 4px; color: #3a7ca5; }
+ 
 /* ── Section headers ── */
 .section-header {
     font-size: 1.35rem; font-weight: 600;
-    color: #e6edf3;
-    border-left: 4px solid #238636;
+    color: #0a2540;
+    border-left: 4px solid #0a6fa8;
     padding-left: 12px;
     margin: 24px 0 14px;
 }
-
+ 
 /* ── Risk badge ── */
 .risk-badge {
     display: inline-block;
@@ -78,21 +78,21 @@ section[data-testid="stSidebar"] .stRadio label {
     font-size: 1.1rem;
     letter-spacing: .5px;
 }
-
+ 
 /* ── Probability bar ── */
-.prob-bar-wrap { background:#21262d; border-radius:999px; height:18px; width:100%; }
+.prob-bar-wrap { background:#b8d8ea; border-radius:999px; height:18px; width:100%; }
 .prob-bar-fill { height:18px; border-radius:999px; transition: width .6s; }
-
+ 
 /* ── Info box ── */
 .info-box {
-    background: #1c2128; border: 1px solid #30363d; border-radius: 10px;
+    background: #ffffff; border: 1px solid #a0cfe8; border-radius: 10px;
     padding: 16px 20px; margin: 10px 0;
 }
-
+ 
 /* ── Feature table row alternating ── */
-.dataframe tbody tr:nth-child(even) { background-color: #161b22 !important; }
-.dataframe tbody tr:nth-child(odd)  { background-color: #0d1117 !important; }
-
+.dataframe tbody tr:nth-child(even) { background-color: #d4eeff !important; }
+.dataframe tbody tr:nth-child(odd)  { background-color: #ffffff !important; }
+ 
 /* ── Button ── */
 div.stButton > button {
     background: linear-gradient(135deg, #238636, #2ea043);
@@ -102,22 +102,22 @@ div.stButton > button {
     transition: opacity .2s;
 }
 div.stButton > button:hover { opacity: .85; }
-
+ 
 /* ── Select / inputs ── */
 .stSelectbox > div > div, .stNumberInput > div > div {
-    background: #161b22 !important; border-color: #30363d !important;
-    color: #e6edf3 !important;
+    background: #ffffff !important; border-color: #a0cfe8 !important;
+    color: #0a2540 !important;
 }
-
+ 
 /* ── Tabs ── */
 button[data-baseweb="tab"] { color: #8b949e !important; }
 button[data-baseweb="tab"][aria-selected="true"] {
     color: #58a6ff !important;
     border-bottom-color: #58a6ff !important;
 }
-
+ 
 /* ── Divider ── */
-hr { border-color: #21262d; }
+hr { border-color: #a0cfe8; }
 </style>
 """, unsafe_allow_html=True)
 
