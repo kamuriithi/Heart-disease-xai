@@ -772,7 +772,7 @@ elif page == "🧠 Explainable AI (SHAP)":
         fig_bs, ax_bs = plt.subplots(figsize=(9, 6))
         for j, (fname, sv_col) in enumerate(zip(fn_ord, sv_ord.T)):
             raw_feat = X_test[:, order[j]]
-            normed   = (raw_feat - raw_feat.min()) / (raw_feat.ptp() + 1e-9)
+            normed   = (raw_feat - raw_feat.min()) / ((raw_feat.max() - raw_feat.min()) + 1e-9)
             colors_s = plt.cm.coolwarm(normed)
             jitter   = np.random.uniform(-0.25, 0.25, size=len(sv_col))
             ax_bs.scatter(sv_col, np.full_like(sv_col, j) + jitter,
