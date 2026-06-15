@@ -405,24 +405,24 @@ if page == "🏠 Dashboard Overview":
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "🔮 Individual Prediction":
     st.markdown('<h2 style="color:#e6edf3;">🔮 Individual Patient Prediction</h2>', unsafe_allow_html=True)
-
+ 
     col_form, col_result = st.columns([2, 3])
-
+ 
     with col_form:
         st.markdown('<div class="section-header">⚙️ Model & Patient Input</div>', unsafe_allow_html=True)
         sel_model = st.selectbox("Select Model", list(models.keys()), index=0)
-
+ 
         with st.expander("👤 Patient Demographics", expanded=True):
             age    = st.slider("Age (years)", 20, 80, 55)
             sex    = st.selectbox("Sex", ["Male (1)", "Female (0)"])
             sex_v  = 1 if "Male" in sex else 0
-
+ 
         with st.expander("❤️ Cardiac Symptoms", expanded=True):
             chest_pain = st.selectbox("Chest Pain Type",
                                       ["asymptomatic", "nonanginal", "nontypical", "typical"])
             ex_ang = st.selectbox("Exercise-Induced Angina", ["No (0)", "Yes (1)"])
             ex_ang_v = 1 if "Yes" in ex_ang else 0
-
+ 
         with st.expander("🩺 Vital Signs & Labs", expanded=True):
             rest_bp  = st.number_input("Resting Blood Pressure (mmHg)", 80, 200, 130)
             chol     = st.number_input("Serum Cholesterol (mg/dl)", 100, 600, 240)
@@ -430,7 +430,7 @@ elif page == "🔮 Individual Prediction":
             oldpeak  = st.number_input("ST Depression (Oldpeak)", 0.0, 7.0, 1.0, 0.1)
             fbs      = st.selectbox("Fasting Blood Sugar >120 mg/dl", ["No (0)", "Yes (1)"])
             fbs_v    = 1 if "Yes" in fbs else 0
-
+ 
         with st.expander("📊 ECG & Imaging", expanded=True):
             rest_ecg = st.selectbox("Resting ECG Result",
                                     ["Normal (0)", "ST-T Abnormality (1)", "LV Hypertrophy (2)"])
@@ -439,28 +439,28 @@ elif page == "🔮 Individual Prediction":
             slope_v = int(slope.split("(")[1].replace(")", ""))
             ca    = st.selectbox("Major Vessels (Ca)", [0, 1, 2, 3])
             thal  = st.selectbox("Thalassemia", ["normal", "fixed", "reversable"])
-
+ 
         predict_btn = st.button("🚀 Predict Risk", use_container_width=True)
-
+ 
     with col_result:
         if predict_btn:
             # Encode categoricals
             chest_enc = le_chest.transform([chest_pain])[0]
             thal_enc  = le_thal.transform([thal])[0]
-
+ 
             raw = np.array([[age, sex_v, chest_enc, rest_bp, chol, fbs_v,
                              rest_ecg_v, max_hr, ex_ang_v, oldpeak, slope_v, ca, thal_enc]])
             X_scaled = scaler.transform(raw)
-
+ 
             clf   = models[sel_model]
             prob  = clf.predict_proba(X_scaled)[0][1]
             pred  = int(prob >= 0.5)
-
+ 
             label, color, bg_color = risk_info(prob)
             pct   = int(prob * 100)
-
+ 
             st.markdown('<div class="section-header">📋 Prediction Result</div>', unsafe_allow_html=True)
-
+ 
             # Risk badge
             st.markdown(f"""
             <div style='text-align:center; background:{bg_color};
@@ -474,7 +474,7 @@ elif page == "🔮 Individual Prediction":
                 <div style='color:#8b949e;font-size:.85rem;'>Probability of Heart Disease</div>
             </div>
             """, unsafe_allow_html=True)
-
+ 
             # Probability gauge bar
             st.markdown("**Probability Gauge**")
             bar_html = f"""
@@ -496,32 +496,39 @@ elif page == "🔮 Individual Prediction":
                 </div>
             </div>"""
             st.markdown(bar_html, unsafe_allow_html=True)
-
+ 
             # Recommendations
             st.markdown('<div class="section-header">💊 Clinical Recommendations</div>',
                         unsafe_allow_html=True)
             for rec in recommendations(prob):
                 st.markdown(f"""
-                <div style='background:#161b22;border:1px solid #30363d;border-radius:8px;
-                    padding:9px 14px;margin:5px 0;color:#c9d1d9;font-size:.9rem;'>{rec}</div>
+                <div style='background:#ffffff;border:1px solid #a0cfe8;border-radius:8px;
+                    padding:9px 14px;margin:5px 0;color:#0a2540;font-size:.9rem;'>{rec}</div>
                 """, unsafe_allow_html=True)
-
+ 
             # SHAP waterfall
             st.markdown('<div class="section-header">🧠 SHAP Explanation</div>', unsafe_allow_html=True)
             if sel_model in shap_values:
                 sv_data = shap_values[sel_model]
                 sv_arr  = np.array(sv_data["values"])
                 base_v  = sv_data["base_value"]
-
-                # Use first test sample as reference; replace with patient input shap
-                # Use index 0 as proxy (true patient SHAP requires re-running explainer)
-                sample_shap = sv_arr[0]
-                feat_shap = list(zip(feature_names, sample_shap))
-                feat_shap_sorted = sorted(feat_shap, key=lambda x: abs(x[1]), reverse=True)[:10]
-
+ 
+                # Use first test sample as reference proxy for SHAP waterfall
+                # Flatten to 1-D array of scalars regardless of storage format
+                sample_shap = np.array(sv_arr[0], dtype=float).flatten()
+                # Ensure length matches feature_names
+                n_feats = len(feature_names)
+                if len(sample_shap) > n_feats:
+                    sample_shap = sample_shap[:n_feats]
+                elif len(sample_shap) < n_feats:
+                    sample_shap = np.pad(sample_shap, (0, n_feats - len(sample_shap)))
+ 
+                feat_shap = list(zip(feature_names, sample_shap.tolist()))
+                feat_shap_sorted = sorted(feat_shap, key=lambda x: abs(float(x[1])), reverse=True)[:10]
+ 
                 fnames_wf = [f[0] for f in feat_shap_sorted]
-                fvals_wf  = [f[1] for f in feat_shap_sorted]
-
+                fvals_wf  = [float(f[1]) for f in feat_shap_sorted]
+ 
                 fig_wf, ax_wf = plt.subplots(figsize=(7, 4.5))
                 colors_wf = ["#f85149" if v > 0 else "#3fb950" for v in fvals_wf]
                 bars = ax_wf.barh(range(len(fnames_wf)), fvals_wf[::-1],
@@ -534,15 +541,15 @@ elif page == "🔮 Individual Prediction":
                 p_pos = mpatches.Patch(color='#f85149', label='↑ Increases Risk')
                 p_neg = mpatches.Patch(color='#3fb950', label='↓ Decreases Risk')
                 ax_wf.legend(handles=[p_pos, p_neg], fontsize=8,
-                             facecolor='#161b22', edgecolor='#30363d',
-                             labelcolor='#c9d1d9')
+                             facecolor='#ffffff', edgecolor='#a0cfe8',
+                             labelcolor='#0a2540')
                 apply_dark_style(fig_wf)
                 plt.tight_layout()
                 st.pyplot(fig_wf, use_container_width=True)
                 plt.close(fig_wf)
-
+ 
                 st.markdown(f"""
-                <div class='info-box' style='font-size:.82rem;color:#8b949e;'>
+                <div class='info-box' style='font-size:.82rem;color:#3a7ca5; background:#ffffff; border:1px solid #a0cfe8;'>
                     🔵 Base value (average model output): <strong style='color:#58a6ff;'>{base_v:.4f}</strong>
                     &nbsp;|&nbsp; Red bars push prediction higher &nbsp;|&nbsp; Green bars push prediction lower
                 </div>""", unsafe_allow_html=True)
@@ -554,8 +561,7 @@ elif page == "🔮 Individual Prediction":
                     Fill in patient information and click <strong style='color:#3fb950;'>Predict Risk</strong>
                 </div>
             </div>""", unsafe_allow_html=True)
-
-
+ 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — MODEL PERFORMANCE
 # ══════════════════════════════════════════════════════════════════════════════
