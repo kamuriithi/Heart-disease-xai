@@ -21,7 +21,7 @@ st.markdown("""
 html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 
 /* ── Background ── */
-.stApp { background: #0d1117; color: #e6edf3; }
+.stApp { background: #1e293b; color: #e6edf3; }
 
 /* ── Sidebar ── */
 section[data-testid="stSidebar"] {
