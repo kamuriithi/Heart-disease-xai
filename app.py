@@ -10,9 +10,21 @@ import joblib, json, warnings, os
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
+from groq import Groq
 warnings.filterwarnings("ignore")
 
+# ── Groq AI Assistant Config ───────────────────────────────────────────────────
+GROQ_MODEL = "llama-3.3-70b-versatile"
+
 # ── Page config ────────────────────────────────────────────────────────────────
+st.set_page_config(
+    page_title="Heart Disease XAI Dashboard",
+    page_icon="🫀",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# ── Custom CSS ─────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 /* ── Base & fonts ── */
@@ -237,19 +249,19 @@ def apply_dark_style(fig, ax_list=None):
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown("""
-    <div style='text-align:center; padding: 16px 0 24px 0;'>
-    """, unsafe_allow_html=True)
-    
-    # Display Chuka University Logo
-    st.image("logo.png", use_container_width=True)
-    
-    st.markdown("""
     <div style='text-align:center; padding: 16px 0 8px;'>
-        <div style='font-size:0.84rem; color:#8b949e;'>
-            CDAM AI Hub <br> Python for Data Science and Machine Learning
+        <div style='font-size:2.8rem'>🫀</div>
+        <div style='font-size:1.15rem; font-weight:700; color:#58a6ff; margin-top:4px;'>
+            CardioXAI
+        </div>
+        <div style='font-size:0.75rem; color:#8b949e; margin-top:2px;'>
+            Heart Disease Prediction System
+        </div>
+        <hr style='border-color:#21262d; margin:14px 0 6px;'>
+        <div style='font-size:0.72rem; color:#8b949e;'>
+            CDAM AI Hub <br> Python for Data Science and ML
         </div>
     </div>
-                
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -264,6 +276,7 @@ with st.sidebar:
             "🧠 Explainable AI (SHAP)",
             "🗃️ Data Explorer",
             "📖 About & Methods",
+            "🤖 AI Assistant",
         ],
         label_visibility="collapsed",
     )
@@ -271,12 +284,14 @@ with st.sidebar:
     st.markdown("<hr style='border-color:#21262d;'>", unsafe_allow_html=True)
     best_model = max(metrics, key=lambda m: metrics[m]["roc_auc"])
     best_auc   = metrics[best_model]["roc_auc"]
+    
     st.markdown(f"""
     <div style='background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px 14px;font-size:0.8rem;'>
         <div style='color:#8b949e; margin-bottom:6px;'>🏆 Top Model</div>
         <div style='color:#f0883e; font-weight:600;'>{best_model}</div>
         <div style='color:#3fb950; font-size:1rem; font-weight:700;'>AUC = {best_auc:.4f}</div>
     </div>
+
     """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -301,7 +316,7 @@ if page == "🏠 Dashboard Overview":
             </span>
             <span style='background:#161b22;border:1px solid #30363d;border-radius:20px;
                 padding:4px 14px;font-size:0.78rem;color:#8b949e;margin:0 4px;'>
-                📚 Mastery of Python for Data Science and Machine Learning
+                📚 Python for Data Science and Machine Learning
             </span>
         </div>
     </div>
@@ -383,7 +398,7 @@ if page == "🏠 Dashboard Overview":
         st.dataframe(pd.DataFrame(lb), use_container_width=True, hide_index=True)
 
         # Risk categories
-        st.markdown('<div class="section-header">🚦 Risk Stratification Guide</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">🚦 Risk Category Guide</div>', unsafe_allow_html=True)
         risk_data = [
             ("🟢 Low Risk",      "< 25%",     "Routine monitoring; healthy lifestyle"),
             ("🟡 Mild Risk",     "25% – 50%", "Clinical follow-up; lifestyle modification"),
@@ -405,24 +420,24 @@ if page == "🏠 Dashboard Overview":
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "🔮 Individual Prediction":
     st.markdown('<h2 style="color:#e6edf3;">🔮 Individual Patient Prediction</h2>', unsafe_allow_html=True)
- 
+
     col_form, col_result = st.columns([2, 3])
- 
+
     with col_form:
         st.markdown('<div class="section-header">⚙️ Model & Patient Input</div>', unsafe_allow_html=True)
         sel_model = st.selectbox("Select Model", list(models.keys()), index=0)
- 
+
         with st.expander("👤 Patient Demographics", expanded=True):
             age    = st.slider("Age (years)", 20, 80, 55)
             sex    = st.selectbox("Sex", ["Male (1)", "Female (0)"])
             sex_v  = 1 if "Male" in sex else 0
- 
+
         with st.expander("❤️ Cardiac Symptoms", expanded=True):
             chest_pain = st.selectbox("Chest Pain Type",
                                       ["asymptomatic", "nonanginal", "nontypical", "typical"])
             ex_ang = st.selectbox("Exercise-Induced Angina", ["No (0)", "Yes (1)"])
             ex_ang_v = 1 if "Yes" in ex_ang else 0
- 
+
         with st.expander("🩺 Vital Signs & Labs", expanded=True):
             rest_bp  = st.number_input("Resting Blood Pressure (mmHg)", 80, 200, 130)
             chol     = st.number_input("Serum Cholesterol (mg/dl)", 100, 600, 240)
@@ -430,7 +445,7 @@ elif page == "🔮 Individual Prediction":
             oldpeak  = st.number_input("ST Depression (Oldpeak)", 0.0, 7.0, 1.0, 0.1)
             fbs      = st.selectbox("Fasting Blood Sugar >120 mg/dl", ["No (0)", "Yes (1)"])
             fbs_v    = 1 if "Yes" in fbs else 0
- 
+
         with st.expander("📊 ECG & Imaging", expanded=True):
             rest_ecg = st.selectbox("Resting ECG Result",
                                     ["Normal (0)", "ST-T Abnormality (1)", "LV Hypertrophy (2)"])
@@ -439,28 +454,28 @@ elif page == "🔮 Individual Prediction":
             slope_v = int(slope.split("(")[1].replace(")", ""))
             ca    = st.selectbox("Major Vessels (Ca)", [0, 1, 2, 3])
             thal  = st.selectbox("Thalassemia", ["normal", "fixed", "reversable"])
- 
+
         predict_btn = st.button("🚀 Predict Risk", use_container_width=True)
- 
+
     with col_result:
         if predict_btn:
             # Encode categoricals
             chest_enc = le_chest.transform([chest_pain])[0]
             thal_enc  = le_thal.transform([thal])[0]
- 
+
             raw = np.array([[age, sex_v, chest_enc, rest_bp, chol, fbs_v,
                              rest_ecg_v, max_hr, ex_ang_v, oldpeak, slope_v, ca, thal_enc]])
             X_scaled = scaler.transform(raw)
- 
+
             clf   = models[sel_model]
             prob  = clf.predict_proba(X_scaled)[0][1]
             pred  = int(prob >= 0.5)
- 
+
             label, color, bg_color = risk_info(prob)
             pct   = int(prob * 100)
- 
+
             st.markdown('<div class="section-header">📋 Prediction Result</div>', unsafe_allow_html=True)
- 
+
             # Risk badge
             st.markdown(f"""
             <div style='text-align:center; background:{bg_color};
@@ -474,7 +489,7 @@ elif page == "🔮 Individual Prediction":
                 <div style='color:#8b949e;font-size:.85rem;'>Probability of Heart Disease</div>
             </div>
             """, unsafe_allow_html=True)
- 
+
             # Probability gauge bar
             st.markdown("**Probability Gauge**")
             bar_html = f"""
@@ -496,43 +511,32 @@ elif page == "🔮 Individual Prediction":
                 </div>
             </div>"""
             st.markdown(bar_html, unsafe_allow_html=True)
- 
+
             # Recommendations
             st.markdown('<div class="section-header">💊 Clinical Recommendations</div>',
                         unsafe_allow_html=True)
             for rec in recommendations(prob):
                 st.markdown(f"""
-                <div style='background:#ffffff;border:1px solid #a0cfe8;border-radius:8px;
-                    padding:9px 14px;margin:5px 0;color:#0a2540;font-size:.9rem;'>{rec}</div>
+                <div style='background:#161b22;border:1px solid #30363d;border-radius:8px;
+                    padding:9px 14px;margin:5px 0;color:#c9d1d9;font-size:.9rem;'>{rec}</div>
                 """, unsafe_allow_html=True)
- 
+
             # SHAP waterfall
             st.markdown('<div class="section-header">🧠 SHAP Explanation</div>', unsafe_allow_html=True)
             if sel_model in shap_values:
                 sv_data = shap_values[sel_model]
-                sv_arr  = np.array(sv_data["values"], dtype=float)
-                if sv_arr.ndim == 3:
-                    sv_arr = sv_arr[:, :, 1]
-                elif sv_arr.ndim == 1:
-                    sv_arr = sv_arr.reshape(1, -1)
-                base_v  = float(sv_data["base_value"])
- 
-                # Use first test sample as reference proxy for SHAP waterfall
-                # Flatten to 1-D array of scalars regardless of storage format
-                sample_shap = np.array(sv_arr[0], dtype=float).flatten()
-                # Ensure length matches feature_names
-                n_feats = len(feature_names)
-                if len(sample_shap) > n_feats:
-                    sample_shap = sample_shap[:n_feats]
-                elif len(sample_shap) < n_feats:
-                    sample_shap = np.pad(sample_shap, (0, n_feats - len(sample_shap)))
- 
-                feat_shap = list(zip(feature_names, sample_shap.tolist()))
-                feat_shap_sorted = sorted(feat_shap, key=lambda x: abs(float(x[1])), reverse=True)[:10]
- 
+                sv_arr  = np.array(sv_data["values"])
+                base_v  = sv_data["base_value"]
+
+                # Use first test sample as reference; replace with patient input shap
+                # Use index 0 as proxy (true patient SHAP requires re-running explainer)
+                sample_shap = sv_arr[0]
+                feat_shap = list(zip(feature_names, sample_shap))
+                feat_shap_sorted = sorted(feat_shap, key=lambda x: abs(x[1]), reverse=True)[:10]
+
                 fnames_wf = [f[0] for f in feat_shap_sorted]
-                fvals_wf  = [float(f[1]) for f in feat_shap_sorted]
- 
+                fvals_wf  = [f[1] for f in feat_shap_sorted]
+
                 fig_wf, ax_wf = plt.subplots(figsize=(7, 4.5))
                 colors_wf = ["#f85149" if v > 0 else "#3fb950" for v in fvals_wf]
                 bars = ax_wf.barh(range(len(fnames_wf)), fvals_wf[::-1],
@@ -545,15 +549,15 @@ elif page == "🔮 Individual Prediction":
                 p_pos = mpatches.Patch(color='#f85149', label='↑ Increases Risk')
                 p_neg = mpatches.Patch(color='#3fb950', label='↓ Decreases Risk')
                 ax_wf.legend(handles=[p_pos, p_neg], fontsize=8,
-                             facecolor='#ffffff', edgecolor='#a0cfe8',
-                             labelcolor='#0a2540')
+                             facecolor='#161b22', edgecolor='#30363d',
+                             labelcolor='#c9d1d9')
                 apply_dark_style(fig_wf)
                 plt.tight_layout()
                 st.pyplot(fig_wf, use_container_width=True)
                 plt.close(fig_wf)
- 
+
                 st.markdown(f"""
-                <div class='info-box' style='font-size:.82rem;color:#3a7ca5; background:#ffffff; border:1px solid #a0cfe8;'>
+                <div class='info-box' style='font-size:.82rem;color:#8b949e;'>
                     🔵 Base value (average model output): <strong style='color:#58a6ff;'>{base_v:.4f}</strong>
                     &nbsp;|&nbsp; Red bars push prediction higher &nbsp;|&nbsp; Green bars push prediction lower
                 </div>""", unsafe_allow_html=True)
@@ -565,7 +569,8 @@ elif page == "🔮 Individual Prediction":
                     Fill in patient information and click <strong style='color:#3fb950;'>Predict Risk</strong>
                 </div>
             </div>""", unsafe_allow_html=True)
- 
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — MODEL PERFORMANCE
 # ══════════════════════════════════════════════════════════════════════════════
@@ -714,30 +719,25 @@ elif page == "📈 ROC Analysis":
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "🧠 Explainable AI (SHAP)":
     st.markdown('<h2 style="color:#e6edf3;">🧠 Explainable AI — SHAP Analysis</h2>', unsafe_allow_html=True)
- 
+
     shap_model = st.selectbox("Select Model for SHAP Analysis", list(shap_values.keys()), index=0)
- 
+
     sv_data  = shap_values[shap_model]
-    sv_arr   = np.array(sv_data["values"], dtype=float)
-    # If stored as 3D (samples, features, classes) squeeze to 2D
-    if sv_arr.ndim == 3:
-        sv_arr = sv_arr[:, :, 1]
-    elif sv_arr.ndim == 1:
-        sv_arr = sv_arr.reshape(1, -1)
-    base_val = float(sv_data["base_value"])
- 
+    sv_arr   = np.array(sv_data["values"])
+    base_val = sv_data["base_value"]
+
     tab1, tab2, tab3, tab4 = st.tabs([
         "📊 Feature Importance", "🐝 SHAP Beeswarm",
         "🌊 Individual Waterfall", "🔗 Dependence Plot"
     ])
- 
+
     # ── Tab 1: Feature Importance ──────────────────────────────────────────────
     with tab1:
         st.markdown('<div class="section-header">📊 Mean |SHAP| Feature Importance</div>',
                     unsafe_allow_html=True)
-        mean_abs = np.abs(sv_arr).mean(axis=0).astype(float).flatten()
-        fi_sorted = sorted(zip(feature_names, mean_abs.tolist()), key=lambda x: float(x[1]))
- 
+        mean_abs = np.abs(sv_arr).mean(axis=0)
+        fi_sorted = sorted(zip(feature_names, mean_abs), key=lambda x: x[1])
+
         col_fi1, col_fi2 = st.columns([3, 2])
         with col_fi1:
             fig_fi, ax_fi = plt.subplots(figsize=(7, 5))
@@ -747,35 +747,35 @@ elif page == "🧠 Explainable AI (SHAP)":
             ax_fi.set_xlabel("Mean |SHAP Value|", fontsize=10)
             ax_fi.set_title(f"Global Feature Importance — {shap_model}", fontsize=11, pad=8)
             apply_dark_style(fig_fi)
-            ax_fi.xaxis.grid(True, color='#b8d8ea', linewidth=0.5)
+            ax_fi.xaxis.grid(True, color='#21262d', linewidth=0.5)
             plt.tight_layout()
             st.pyplot(fig_fi, use_container_width=True)
             plt.close(fig_fi)
- 
+
         with col_fi2:
             fi_df = pd.DataFrame(
-                [(f, f"{float(v):.4f}") for f, v in sorted(zip(feature_names, mean_abs.tolist()),
-                                                      key=lambda x: float(x[1]), reverse=True)],
+                [(f, f"{v:.4f}") for f, v in sorted(zip(feature_names, mean_abs),
+                                                      key=lambda x: x[1], reverse=True)],
                 columns=["Feature", "Mean |SHAP|"]
             )
             fi_df.insert(0, "Rank", range(1, len(fi_df)+1))
             st.dataframe(fi_df, use_container_width=True, hide_index=True)
             st.markdown("""
-            <div class='info-box' style='font-size:.82rem;color:#3a7ca5;margin-top:10px; background:#ffffff; border:1px solid #a0cfe8;'>
+            <div class='info-box' style='font-size:.82rem;color:#8b949e;margin-top:10px;'>
                 <strong>Mean |SHAP|</strong> = average absolute contribution of each feature
                 across all test patients. Higher = more influential in model decisions.
             </div>""", unsafe_allow_html=True)
- 
+
     # ── Tab 2: Beeswarm ─────────────────────────────────────────────────────────
     with tab2:
         st.markdown('<div class="section-header">🐝 SHAP Beeswarm (Summary) Plot</div>',
                     unsafe_allow_html=True)
- 
+
         # Sort features by mean|shap|
         order = np.argsort(np.abs(sv_arr).mean(axis=0))
         sv_ord = sv_arr[:, order]
         fn_ord = [feature_names[i] for i in order]
- 
+
         fig_bs, ax_bs = plt.subplots(figsize=(9, 6))
         for j, (fname, sv_col) in enumerate(zip(fn_ord, sv_ord.T)):
             raw_feat = X_test[:, order[j]]
@@ -794,20 +794,20 @@ elif page == "🧠 Explainable AI (SHAP)":
         ax_bs.set_xlabel("SHAP Value", fontsize=11)
         ax_bs.set_title(f"SHAP Beeswarm Plot — {shap_model}", fontsize=12, pad=10)
         apply_dark_style(fig_bs)
-        ax_bs.xaxis.grid(True, color='#b8d8ea', linewidth=0.4)
+        ax_bs.xaxis.grid(True, color='#21262d', linewidth=0.4)
         plt.tight_layout()
         st.pyplot(fig_bs, use_container_width=True)
         plt.close(fig_bs)
- 
+
         st.markdown("""
-        <div class='info-box' style='font-size:.85rem;line-height:1.7;color:#0a2540; background:#ffffff; border:1px solid #a0cfe8;'>
+        <div class='info-box' style='font-size:.85rem;line-height:1.7;color:#c9d1d9;'>
             🔴 <strong>Red dots</strong> = high feature value &nbsp;|&nbsp;
             🔵 <strong>Blue dots</strong> = low feature value<br>
             Dots to the <strong>right of zero</strong> increase the predicted risk.
             Dots to the <strong>left</strong> decrease it.
             The vertical spread shows distribution over all test patients.
         </div>""", unsafe_allow_html=True)
- 
+
     # ── Tab 3: Individual Waterfall ──────────────────────────────────────────────
     with tab3:
         st.markdown('<div class="section-header">🌊 Individual Patient Waterfall</div>',
@@ -817,12 +817,12 @@ elif page == "🧠 Explainable AI (SHAP)":
         patient_idx = st.slider("Select Patient Index", 0, n_patients - 1, 0)
         true_label  = y_test[patient_idx]
         sample_sv   = sv_arr[patient_idx]
- 
+
         pairs   = sorted(zip(feature_names, sample_sv), key=lambda x: x[1])
         f_names = [p[0] for p in pairs]
         f_vals  = [p[1] for p in pairs]
         colors_wfall = ["#3fb950" if v < 0 else "#f85149" for v in f_vals]
- 
+
         fig_wfall, ax_wfall = plt.subplots(figsize=(8, 5.5))
         ax_wfall.barh(f_names, f_vals, color=colors_wfall, edgecolor='none', height=0.6)
         ax_wfall.axvline(0, color='#8b949e', linewidth=0.8, linestyle='--')
@@ -833,34 +833,34 @@ elif page == "🧠 Explainable AI (SHAP)":
         p_pos = mpatches.Patch(color='#f85149', label='Increases Risk')
         p_neg = mpatches.Patch(color='#3fb950', label='Decreases Risk')
         ax_wfall.legend(handles=[p_pos, p_neg], fontsize=9,
-                        facecolor='#ffffff', edgecolor='#a0cfe8', labelcolor='#0a2540')
+                        facecolor='#161b22', edgecolor='#30363d', labelcolor='#c9d1d9')
         apply_dark_style(fig_wfall)
-        ax_wfall.xaxis.grid(True, color='#b8d8ea', linewidth=0.4)
+        ax_wfall.xaxis.grid(True, color='#21262d', linewidth=0.4)
         plt.tight_layout()
         st.pyplot(fig_wfall, use_container_width=True)
         plt.close(fig_wfall)
- 
+
         st.markdown(f"""
-        <div class='info-box' style='font-size:.85rem;color:#3a7ca5; background:#ffffff; border:1px solid #a0cfe8;'>
+        <div class='info-box' style='font-size:.85rem;color:#8b949e;'>
             Model baseline (E[f(X)]): <strong style='color:#58a6ff;'>{base_val:.4f}</strong>
             &nbsp;|&nbsp; Sum of SHAP contributions shifts prediction from baseline to final output.
         </div>""", unsafe_allow_html=True)
- 
+
     # ── Tab 4: Dependence Plot ────────────────────────────────────────────────
     with tab4:
         st.markdown('<div class="section-header">🔗 SHAP Dependence Plot</div>', unsafe_allow_html=True)
         feat_sel = st.selectbox("Select Feature", feature_names, index=feature_names.index("Age"))
         fi       = feature_names.index(feat_sel)
- 
+
         # Align lengths — sv_arr may be shorter than X_test due to KernelExplainer padding
         n_dep      = min(len(X_test), len(sv_arr))
         feat_vals  = X_test[:n_dep, fi]
         shap_for_f = sv_arr[:n_dep, fi]
- 
+
         # Colour by highest-interaction feature (Ca)
         color_fi   = feature_names.index("Ca")
         color_vals = X_test[:n_dep, color_fi]
- 
+
         fig_dep, ax_dep = plt.subplots(figsize=(8, 5))
         sc = ax_dep.scatter(feat_vals, shap_for_f, c=color_vals,
                             cmap='RdYlGn_r', s=35, alpha=0.75, linewidths=0)
@@ -873,17 +873,18 @@ elif page == "🧠 Explainable AI (SHAP)":
         ax_dep.set_ylabel("SHAP Value", fontsize=11)
         ax_dep.set_title(f"SHAP Dependence: {feat_sel} — {shap_model}", fontsize=12, pad=10)
         apply_dark_style(fig_dep)
-        ax_dep.grid(True, color='#b8d8ea', linewidth=0.4)
+        ax_dep.grid(True, color='#21262d', linewidth=0.4)
         plt.tight_layout()
         st.pyplot(fig_dep, use_container_width=True)
         plt.close(fig_dep)
- 
+
         st.markdown(f"""
-        <div class='info-box' style='font-size:.85rem;line-height:1.7;color:#0a2540; background:#ffffff; border:1px solid #a0cfe8;'>
+        <div class='info-box' style='font-size:.85rem;line-height:1.7;color:#c9d1d9;'>
             X-axis: scaled values of <strong>{feat_sel}</strong>.
             Y-axis: SHAP contribution to predicted risk. Points above zero push the prediction
             higher; points below reduce it. Colour encodes a secondary interaction feature (Ca).
         </div>""", unsafe_allow_html=True)
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 6 — DATA EXPLORER
@@ -965,14 +966,13 @@ elif page == "🗃️ Data Explorer":
     st.pyplot(fig_corr, use_container_width=True)
     plt.close(fig_corr)
 
+
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 7 — ABOUT & METHODS
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "📖 About & Methods":
     st.markdown('<h2 style="color:#e6edf3;">📖 About This System & Methodology</h2>',
                 unsafe_allow_html=True)
- # Display Chuka University Logo
-    st.image("dS_lifecycle.png", use_container_width=True)
 
     col1, col2 = st.columns(2)
 
@@ -1057,3 +1057,134 @@ elif page == "📖 About & Methods":
         </p>
     </div>
     """, unsafe_allow_html=True)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PAGE 8 — AI ASSISTANT (Groq LLaMA)
+# ══════════════════════════════════════════════════════════════════════════════
+elif page == "🤖 AI Assistant":
+    st.markdown('<h2 style="color:#e6edf3;">🤖 CardioXAI AI Assistant</h2>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class='info-box' style='margin-bottom:18px;font-size:.92rem;color:#c9d1d9;line-height:1.7;'>
+        Ask the AI Assistant anything about <strong style='color:#58a6ff;'>heart disease</strong>,
+        <strong style='color:#3fb950;'>cardiovascular risk factors</strong>,
+        <strong style='color:#d2a8ff;'>machine learning models</strong>, or how to interpret
+        your prediction results. Powered by <strong style='color:#f0883e;'>LLaMA 3.3 70B</strong> via Groq.
+        <br><br>
+        <span style='color:#f85149;font-size:.8rem;'>⚠️ For educational purposes only. Not a substitute for medical advice.</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # API key input
+    groq_api_key = st.text_input(
+        "🔑 Groq API Key",
+        type="password",
+        placeholder="Enter your Groq API key (get one free at console.groq.com)",
+        help="Your key is never stored and only used for this session.",
+    )
+
+    # Suggested quick questions
+    st.markdown('<div class="section-header">💡 Quick Questions</div>', unsafe_allow_html=True)
+    quick_cols = st.columns(3)
+    quick_questions = [
+        "What is CAD and how is it diagnosed?",
+        "What does a high SHAP value mean?",
+        "How does XGBoost work for classification?",
+        "What lifestyle changes reduce heart disease risk?",
+        "Explain ROC-AUC in simple terms",
+        "What is ST depression (Oldpeak)?",
+    ]
+    for i, q in enumerate(quick_questions):
+        with quick_cols[i % 3]:
+            if st.button(q, key=f"quick_{i}", use_container_width=True):
+                st.session_state.setdefault("ai_messages", [])
+                st.session_state["ai_messages"].append({"role": "user", "content": q})
+                st.session_state["ai_trigger"] = True
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # Initialise chat history
+    if "ai_messages" not in st.session_state:
+        st.session_state["ai_messages"] = []
+
+    # Display existing chat messages
+    for msg in st.session_state["ai_messages"]:
+        if msg["role"] == "user":
+            st.markdown(f"""
+            <div style='background:#1c2128;border:1px solid #30363d;border-radius:10px;
+                padding:12px 16px;margin:8px 0;display:flex;gap:12px;align-items:flex-start;'>
+                <span style='font-size:1.3rem;'>👤</span>
+                <span style='color:#e6edf3;line-height:1.6;'>{msg["content"]}</span>
+            </div>""", unsafe_allow_html=True)
+        else:
+            st.markdown(f"""
+            <div style='background:#161b22;border:1px solid #238636;border-radius:10px;
+                padding:12px 16px;margin:8px 0;display:flex;gap:12px;align-items:flex-start;'>
+                <span style='font-size:1.3rem;'>🤖</span>
+                <span style='color:#c9d1d9;line-height:1.7;'>{msg["content"]}</span>
+            </div>""", unsafe_allow_html=True)
+
+    # Chat input row
+    col_input, col_send = st.columns([5, 1])
+    with col_input:
+        user_input = st.text_input(
+            "Your message",
+            key="ai_user_input",
+            placeholder="Ask about heart disease, models, SHAP explanations...",
+            label_visibility="collapsed",
+        )
+    with col_send:
+        send_btn = st.button("Send ➤", use_container_width=True)
+
+    # Trigger response from send button OR quick-question click
+    trigger = send_btn or st.session_state.pop("ai_trigger", False)
+
+    if trigger:
+        if send_btn and user_input.strip():
+            st.session_state["ai_messages"].append({"role": "user", "content": user_input.strip()})
+
+        if not groq_api_key:
+            st.warning("⚠️ Please enter your Groq API key above to use the AI Assistant.")
+        elif st.session_state["ai_messages"]:
+            with st.spinner("🤖 Thinking..."):
+                try:
+                    client = Groq(api_key=groq_api_key)
+
+                    system_prompt = (
+                        "You are CardioXAI Assistant, an expert AI specialising in cardiovascular medicine, "
+                        "clinical cardiology, and explainable machine learning for heart disease prediction. "
+                        "You help users of the CardioXAI dashboard — a Streamlit app built for the CDAM "
+                        "Python for Data Science and Machine Learning course at Chuka University, Kenya. "
+                        "The dashboard uses five ML models (Logistic Regression, KNN, SVM, Random Forest, XGBoost) "
+                        "trained on the UCI Heart Disease dataset and explains predictions with SHAP values. "
+                        "Answer questions about heart disease risk factors, clinical interpretation of predictions, "
+                        "model behaviour, SHAP explanations, and cardiology concepts behind features like "
+                        "ST depression, thalassemia, chest pain types, and more. "
+                        "Always remind users that predictions are for educational purposes only and are not a "
+                        "substitute for professional medical advice. Keep answers clear, concise, and clinically accurate."
+                    )
+
+                    response = client.chat.completions.create(
+                        model=GROQ_MODEL,
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            *st.session_state["ai_messages"],
+                        ],
+                        max_tokens=1024,
+                        temperature=0.5,
+                    )
+                    assistant_reply = response.choices[0].message.content
+                    st.session_state["ai_messages"].append(
+                        {"role": "assistant", "content": assistant_reply}
+                    )
+                    st.rerun()
+
+                except Exception as e:
+                    st.error(f"❌ Groq API error: {e}")
+
+    # Clear chat
+    if st.session_state.get("ai_messages"):
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🗑️ Clear Conversation", use_container_width=False):
+            st.session_state["ai_messages"] = []
+            st.rerun()
