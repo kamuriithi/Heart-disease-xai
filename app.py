@@ -265,14 +265,14 @@ with st.sidebar:
     page = st.radio(
         "## Navigation",
         [
-            "🏠 Dashboard Overview",
-            "🔮 Individual Prediction",
-            "📊 Model Performance",
-            "📈 ROC Analysis",
-            "🧠 Explainable AI (SHAP)",
-            "🗃️ Data Explorer",
-            "📖 About & Methods",
-            "🤖 AI Assistant",
+            "Dashboard Overview",
+            "Individual Prediction",
+            "Model Performance",
+            "ROC Analysis",
+            "Explainable AI (SHAP)",
+            "Data Explorer",
+            "About & Methods",
+            "AI Assistant",
         ],
         label_visibility="collapsed",
     )
@@ -293,7 +293,7 @@ with st.sidebar:
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 1 — DASHBOARD OVERVIEW
 # ══════════════════════════════════════════════════════════════════════════════
-if page == "🏠 Dashboard Overview":
+if page == "Dashboard Overview":
     # Header
     st.markdown("""
     <div class="header-banner">
@@ -555,7 +555,6 @@ elif page == "🔮 Individual Prediction":
                     Fill in patient information and click <strong style='color:#3fb950;'>Predict Risk</strong>
                 </div>
             </div>""", unsafe_allow_html=True)
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — MODEL PERFORMANCE
