@@ -13,8 +13,13 @@ import seaborn as sns
 from groq import Groq
 warnings.filterwarnings("ignore")
 
-# ── Groq AI Assistant Config ───────────────────────────────────────────────────
+# ── Groq config ────────────────────────────────────────────────────────────────
 GROQ_MODEL = "llama-3.3-70b-versatile"
+# Try secrets.toml first, then env var, then hardcoded fallback
+try:
+    GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+except Exception:
+    GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
 
 # ── Page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -42,7 +47,7 @@ section[data-testid="stSidebar"] {
 }
 section[data-testid="stSidebar"] .stRadio label {
     color: #c9d1d9 !important;
-    font-size: 0.95rem;
+    font-size: 1.2rem;
     padding: 6px 0;
 }
 
@@ -66,7 +71,7 @@ section[data-testid="stSidebar"] .stRadio label {
 
 /* ── Section headers ── */
 .section-header {
-    font-size: 1.35rem; font-weight: 600;
+    font-size: 1.55rem; font-weight: 600;
     color: #e6edf3;
     border-left: 4px solid #238636;
     padding-left: 12px;
@@ -79,7 +84,7 @@ section[data-testid="stSidebar"] .stRadio label {
     padding: 8px 20px;
     border-radius: 50px;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     letter-spacing: .5px;
 }
 
@@ -249,25 +254,16 @@ def apply_dark_style(fig, ax_list=None):
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown("""
-    <div style='text-align:center; padding: 16px 0 8px;'>
-        <div style='font-size:2.8rem'>🫀</div>
-        <div style='font-size:1.15rem; font-weight:700; color:#58a6ff; margin-top:4px;'>
-            CardioXAI
-        </div>
-        <div style='font-size:0.75rem; color:#8b949e; margin-top:2px;'>
-            Heart Disease Prediction System
-        </div>
-        <hr style='border-color:#21262d; margin:14px 0 6px;'>
-        <div style='font-size:0.72rem; color:#8b949e;'>
-            CDAM AI Hub <br> Python for Data Science and ML
-        </div>
-    </div>
+        <div style='text-align:center; padding: 16px 0 8px;'>   
     """, unsafe_allow_html=True)
-
+    
+  # Display Chuka University Logo
+    st.image("logo.png", use_container_width=True)
+    
     st.markdown("<br>", unsafe_allow_html=True)
 
     page = st.radio(
-        "Navigation",
+        "## Navigation",
         [
             "🏠 Dashboard Overview",
             "🔮 Individual Prediction",
@@ -289,7 +285,7 @@ with st.sidebar:
     <div style='background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px 14px;font-size:0.8rem;'>
         <div style='color:#8b949e; margin-bottom:6px;'>🏆 Top Model</div>
         <div style='color:#f0883e; font-weight:600;'>{best_model}</div>
-        <div style='color:#3fb950; font-size:1rem; font-weight:700;'>AUC = {best_auc:.4f}</div>
+        <div style='color:#3fb950; font-size:2rem; font-weight:700;'>AUC = {best_auc:.4f}</div>
     </div>
 
     """, unsafe_allow_html=True)
@@ -300,25 +296,15 @@ with st.sidebar:
 if page == "🏠 Dashboard Overview":
     # Header
     st.markdown("""
+    <div class="header-banner">
     <div style='text-align:center; padding: 30px 0 20px;'>
         <div style='font-size:5.5rem'>🫀</div>
-        <h1 style='color:#e6edf3; font-size:2.4rem; margin:10px 0 6px; font-weight:700;'>
+        <h1 style='color:#e6edf3; font-size:3.0rem; margin:10px 0 6px; font-weight:700;'>
             Heart Disease Prediction Dashboard
         </h1>
-        <p style='color:#8b949e; font-size:1.05rem; max-width:700px; margin:0 auto;'>
-            An Explainable AI clinical decision-support system using machine learning
-            for early detection of coronary artery disease
-        </p>
-        <div style='margin-top:10px;'>
-            <span style='background:#161b22;border:1px solid #30363d;border-radius:20px;
-                padding:4px 14px;font-size:0.78rem;color:#8b949e;margin:0 4px;'>
-                🏫 CDAM - Chuka University
-            </span>
-            <span style='background:#161b22;border:1px solid #30363d;border-radius:20px;
-                padding:4px 14px;font-size:0.78rem;color:#8b949e;margin:0 4px;'>
-                📚 Python for Data Science and Machine Learning
-            </span>
-        </div>
+        <p style='color:#8b949e; font-size:1.2rem; max-width:700px; margin:0 auto;'>
+            AI clinical decision-support system for early detection of coronary artery disease
+
     </div>
     """, unsafe_allow_html=True)
 
@@ -486,7 +472,7 @@ elif page == "🔮 Individual Prediction":
                     {label}
                 </div>
                 <div style='font-size:3rem;font-weight:800;color:{color};'>{pct}%</div>
-                <div style='color:#8b949e;font-size:.85rem;'>Probability of Heart Disease</div>
+                <div style='color:#8b949e;font-size:1.0rem;'>Probability of Heart Disease</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -518,7 +504,7 @@ elif page == "🔮 Individual Prediction":
             for rec in recommendations(prob):
                 st.markdown(f"""
                 <div style='background:#161b22;border:1px solid #30363d;border-radius:8px;
-                    padding:9px 14px;margin:5px 0;color:#c9d1d9;font-size:.9rem;'>{rec}</div>
+                    padding:9px 14px;margin:5px 0;color:#c9d1d9;font-size:1.2rem;'>{rec}</div>
                 """, unsafe_allow_html=True)
 
             # SHAP waterfall
@@ -557,7 +543,7 @@ elif page == "🔮 Individual Prediction":
                 plt.close(fig_wf)
 
                 st.markdown(f"""
-                <div class='info-box' style='font-size:.82rem;color:#8b949e;'>
+                <div class='info-box' style='font-size:1.2rem;color:#8b949e;'>
                     🔵 Base value (average model output): <strong style='color:#58a6ff;'>{base_v:.4f}</strong>
                     &nbsp;|&nbsp; Red bars push prediction higher &nbsp;|&nbsp; Green bars push prediction lower
                 </div>""", unsafe_allow_html=True)
@@ -971,8 +957,10 @@ elif page == "🗃️ Data Explorer":
 # PAGE 7 — ABOUT & METHODS
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "📖 About & Methods":
-    st.markdown('<h2 style="color:#e6edf3;">📖 About This System & Methodology</h2>',
+    st.markdown('<h2 style="color:#e6edf3;">📖 About this System & Methodology</h2>',
                 unsafe_allow_html=True)
+    # Display Chuka University Logo
+    st.image("dS_lifecycle.png", use_container_width=True)
 
     col1, col2 = st.columns(2)
 
@@ -1060,131 +1048,131 @@ elif page == "📖 About & Methods":
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PAGE 8 — AI ASSISTANT (Groq LLaMA)
+# PAGE 8 — AI ASSISTANT (GROQ)
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "🤖 AI Assistant":
     st.markdown('<h2 style="color:#e6edf3;">🤖 CardioXAI AI Assistant</h2>', unsafe_allow_html=True)
     st.markdown("""
-    <div class='info-box' style='margin-bottom:18px;font-size:.92rem;color:#c9d1d9;line-height:1.7;'>
-        Ask the AI Assistant anything about <strong style='color:#58a6ff;'>heart disease</strong>,
+    <div class='info-box' style='margin-bottom:18px;color:#c9d1d9;font-size:.9rem;line-height:1.7;'>
+        Hi. My name is Afyia, an AI Chatbot specifically designed to help you with any questions you might have regarding <strong style='color:#58a6ff;'>heart disease</strong>,
         <strong style='color:#3fb950;'>cardiovascular risk factors</strong>,
-        <strong style='color:#d2a8ff;'>machine learning models</strong>, or how to interpret
-        your prediction results. Powered by <strong style='color:#f0883e;'>LLaMA 3.3 70B</strong> via Groq.
-        <br><br>
-        <span style='color:#f85149;font-size:.8rem;'>⚠️ For educational purposes only. Not a substitute for medical advice.</span>
+        <strong style='color:#f0883e;'>how this dashboard works</strong>, or general
+        <strong style='color:#d2a8ff;'>clinical cardiology questions</strong>.
+        I <strong></strong> act as a knowledgeable cardiovascular health assistant. <br><br>
+        ⚠️ <em>This assistant is for educational purposes only and does not replace professional medical advice.</em>
     </div>
     """, unsafe_allow_html=True)
 
-    # API key input
-    groq_api_key = st.text_input(
-        "🔑 Groq API Key",
-        type="password",
-        placeholder="Enter your Groq API key (get one free at console.groq.com)",
-        help="Your key is never stored and only used for this session.",
-    )
+    # ── System prompt ──────────────────────────────────────────────────────────
+    SYSTEM_PROMPT = """You are CardioXAI Assistant, an expert AI integrated into a Heart Disease 
+Prediction Dashboard built at CDAM - Chuka University. Your role is to help users understand:
 
-    # Suggested quick questions
+1. Cardiovascular disease, its risk factors, symptoms, and prevention
+2. How the dashboard's ML models (Logistic Regression, KNN, SVM, Random Forest, XGBoost) work
+3. SHAP (SHapley Additive exPlanations) and explainable AI concepts
+4. The clinical features used: Age, Sex, ChestPain, RestBP, Cholesterol, Fasting Blood Sugar, 
+   RestECG, MaxHR, Exercise Angina, ST Depression (Oldpeak), ST Slope, Ca (major vessels), Thalassemia
+5. General heart health advice and lifestyle guidance
+
+Always be clear that you are an educational AI assistant, not a medical professional. 
+Encourage users to consult qualified healthcare professionals for personal medical decisions.
+Keep responses concise, accurate, and empathetic. Format responses with clear structure when helpful.
+"""
+
+    # ── Session state for chat history ─────────────────────────────────────────
+    if "groq_messages" not in st.session_state:
+        st.session_state.groq_messages = []
+
+    # ── API key check ──────────────────────────────────────────────────────────
+    if not GROQ_API_KEY:
+        st.error(
+            "⚠️ Groq API key not found. "
+            "Add `GROQ_API_KEY = 'your_key'` to `.streamlit/secrets.toml` "
+            "or set the `GROQ_API_KEY` environment variable.",
+            icon="🔑",
+        )
+        st.stop()
+
+    # ── Quick-start suggestion buttons ─────────────────────────────────────────
     st.markdown('<div class="section-header">💡 Quick Questions</div>', unsafe_allow_html=True)
-    quick_cols = st.columns(3)
-    quick_questions = [
-        "What is CAD and how is it diagnosed?",
+    suggestions = [
+        "What are the main risk factors for heart disease?",
+        "How does XGBoost predict heart disease?",
         "What does a high SHAP value mean?",
-        "How does XGBoost work for classification?",
-        "What lifestyle changes reduce heart disease risk?",
-        "Explain ROC-AUC in simple terms",
-        "What is ST depression (Oldpeak)?",
+        "What lifestyle changes reduce cardiovascular risk?",
+        "Explain what Oldpeak (ST depression) measures",
+        "What is thalassemia and why does it matter?",
     ]
-    for i, q in enumerate(quick_questions):
-        with quick_cols[i % 3]:
-            if st.button(q, key=f"quick_{i}", use_container_width=True):
-                st.session_state.setdefault("ai_messages", [])
-                st.session_state["ai_messages"].append({"role": "user", "content": q})
-                st.session_state["ai_trigger"] = True
+    cols_sug = st.columns(3)
+    for i, sug in enumerate(suggestions):
+        if cols_sug[i % 3].button(sug, key=f"sug_{i}", use_container_width=True):
+            st.session_state.groq_messages.append({"role": "user", "content": sug})
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Initialise chat history
-    if "ai_messages" not in st.session_state:
-        st.session_state["ai_messages"] = []
+    # ── Chat history display ───────────────────────────────────────────────────
+    chat_container = st.container()
+    with chat_container:
+        for msg in st.session_state.groq_messages:
+            if msg["role"] == "user":
+                st.markdown(f"""
+                <div style='display:flex;justify-content:flex-end;margin:8px 0;'>
+                    <div style='background:#1f3a5f;border:1px solid #2d5986;border-radius:12px 12px 2px 12px;
+                        padding:10px 16px;max-width:75%;color:#e6edf3;font-size:.9rem;line-height:1.6;'>
+                        <span style='font-size:.72rem;color:#58a6ff;font-weight:600;'>YOU</span><br>
+                        {msg["content"]}
+                    </div>
+                </div>""", unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div style='display:flex;justify-content:flex-start;margin:8px 0;'>
+                    <div style='background:#161b22;border:1px solid #30363d;border-radius:12px 12px 12px 2px;
+                        padding:10px 16px;max-width:80%;color:#c9d1d9;font-size:.9rem;line-height:1.6;'>
+                        <span style='font-size:.72rem;color:#3fb950;font-weight:600;'>🤖 CARDIOXAI AI</span><br>
+                        {msg["content"]}
+                    </div>
+                </div>""", unsafe_allow_html=True)
 
-    # Display existing chat messages
-    for msg in st.session_state["ai_messages"]:
-        if msg["role"] == "user":
-            st.markdown(f"""
-            <div style='background:#1c2128;border:1px solid #30363d;border-radius:10px;
-                padding:12px 16px;margin:8px 0;display:flex;gap:12px;align-items:flex-start;'>
-                <span style='font-size:1.3rem;'>👤</span>
-                <span style='color:#e6edf3;line-height:1.6;'>{msg["content"]}</span>
-            </div>""", unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div style='background:#161b22;border:1px solid #238636;border-radius:10px;
-                padding:12px 16px;margin:8px 0;display:flex;gap:12px;align-items:flex-start;'>
-                <span style='font-size:1.3rem;'>🤖</span>
-                <span style='color:#c9d1d9;line-height:1.7;'>{msg["content"]}</span>
-            </div>""", unsafe_allow_html=True)
+    # ── Generate AI response if last message is from user ─────────────────────
+    if st.session_state.groq_messages and st.session_state.groq_messages[-1]["role"] == "user":
+        with st.spinner("🧠 Thinking..."):
+            try:
+                client = Groq(api_key=GROQ_API_KEY)
+                response = client.chat.completions.create(
+                    model=GROQ_MODEL,
+                    messages=[{"role": "system", "content": SYSTEM_PROMPT}]
+                             + st.session_state.groq_messages,
+                    temperature=0.7,
+                    max_tokens=1024,
+                )
+                assistant_reply = response.choices[0].message.content
+                st.session_state.groq_messages.append(
+                    {"role": "assistant", "content": assistant_reply}
+                )
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Groq API error: {e}")
 
-    # Chat input row
-    col_input, col_send = st.columns([5, 1])
-    with col_input:
+    # ── Chat input ─────────────────────────────────────────────────────────────
+    st.markdown('<div class="section-header">💬 Ask a Question</div>', unsafe_allow_html=True)
+    col_inp, col_btn = st.columns([5, 1])
+    with col_inp:
         user_input = st.text_input(
-            "Your message",
-            key="ai_user_input",
-            placeholder="Ask about heart disease, models, SHAP explanations...",
+            "Your question",
+            placeholder="e.g. What does high cholesterol do to the heart?",
             label_visibility="collapsed",
+            key="chat_input",
         )
-    with col_send:
+    with col_btn:
         send_btn = st.button("Send ➤", use_container_width=True)
 
-    # Trigger response from send button OR quick-question click
-    trigger = send_btn or st.session_state.pop("ai_trigger", False)
+    if send_btn and user_input.strip():
+        st.session_state.groq_messages.append({"role": "user", "content": user_input.strip()})
+        st.rerun()
 
-    if trigger:
-        if send_btn and user_input.strip():
-            st.session_state["ai_messages"].append({"role": "user", "content": user_input.strip()})
-
-        if not groq_api_key:
-            st.warning("⚠️ Please enter your Groq API key above to use the AI Assistant.")
-        elif st.session_state["ai_messages"]:
-            with st.spinner("🤖 Thinking..."):
-                try:
-                    client = Groq(api_key=groq_api_key)
-
-                    system_prompt = (
-                        "You are CardioXAI Assistant, an expert AI specialising in cardiovascular medicine, "
-                        "clinical cardiology, and explainable machine learning for heart disease prediction. "
-                        "You help users of the CardioXAI dashboard — a Streamlit app built for the CDAM "
-                        "Python for Data Science and Machine Learning course at Chuka University, Kenya. "
-                        "The dashboard uses five ML models (Logistic Regression, KNN, SVM, Random Forest, XGBoost) "
-                        "trained on the UCI Heart Disease dataset and explains predictions with SHAP values. "
-                        "Answer questions about heart disease risk factors, clinical interpretation of predictions, "
-                        "model behaviour, SHAP explanations, and cardiology concepts behind features like "
-                        "ST depression, thalassemia, chest pain types, and more. "
-                        "Always remind users that predictions are for educational purposes only and are not a "
-                        "substitute for professional medical advice. Keep answers clear, concise, and clinically accurate."
-                    )
-
-                    response = client.chat.completions.create(
-                        model=GROQ_MODEL,
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            *st.session_state["ai_messages"],
-                        ],
-                        max_tokens=1024,
-                        temperature=0.5,
-                    )
-                    assistant_reply = response.choices[0].message.content
-                    st.session_state["ai_messages"].append(
-                        {"role": "assistant", "content": assistant_reply}
-                    )
-                    st.rerun()
-
-                except Exception as e:
-                    st.error(f"❌ Groq API error: {e}")
-
-    # Clear chat
-    if st.session_state.get("ai_messages"):
+    # ── Clear chat ─────────────────────────────────────────────────────────────
+    if st.session_state.groq_messages:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🗑️ Clear Conversation", use_container_width=False):
-            st.session_state["ai_messages"] = []
+        if st.button("🗑️ Clear Chat History", use_container_width=False):
+            st.session_state.groq_messages = []
             st.rerun()
