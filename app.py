@@ -1047,7 +1047,7 @@ elif page == "📖 About & Methods":
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PAGE 8 — AI ASSISTANT (GROQ)
+# PAGE 8 — AI ASSISTANT
 # ══════════════════════════════════════════════════════════════════════════════
 elif page == "🤖 AI Assistant":
     st.markdown('<h2 style="color:#e6edf3;">🤖 CardioXAI AI Assistant</h2>', unsafe_allow_html=True)
@@ -1058,7 +1058,7 @@ elif page == "🤖 AI Assistant":
         <strong style='color:#f0883e;'>how this dashboard works</strong>, or general
         <strong style='color:#d2a8ff;'>clinical cardiology questions</strong>.
         I <strong></strong> act as a knowledgeable cardiovascular health assistant. <br><br>
-        ⚠️ <em>This assistant is for educational purposes only and does not replace professional medical advice.</em>
+        <em>This assistant is for educational purposes only and does not replace professional medical advice.</em>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1093,7 +1093,7 @@ Keep responses concise, accurate, and empathetic. Format responses with clear st
         st.stop()
 
     # ── Quick-start suggestion buttons ─────────────────────────────────────────
-    st.markdown('<div class="section-header">💡 Quick Questions</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Quick Questions</div>', unsafe_allow_html=True)
     suggestions = [
         "What are the main risk factors for heart disease?",
         "How does XGBoost predict heart disease?",
