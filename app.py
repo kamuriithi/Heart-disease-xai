@@ -269,7 +269,7 @@ with st.sidebar:
             "Individual Prediction",
             "Model Performance",
             "ROC Analysis",
-            "Explainable AI (SHAP)",
+            "Explainable AI",
             "Data Explorer",
             "About & Methods",
             "AI Assistant",
