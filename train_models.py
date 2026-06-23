@@ -29,6 +29,10 @@ def main():
     # Load data
     df = pd.read_csv(args.data)
     
+    # --- FIX: Drop the redundant 'AHD' column (it contains Yes/No strings, while 'HD' is our 0/1 target) ---
+    if "AHD" in df.columns:
+        df = df.drop(columns=["AHD"])
+    
     # Save original data
     df.to_csv(os.path.join(model_dir, "original_data.csv"), index=False)
 
