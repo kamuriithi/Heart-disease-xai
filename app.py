@@ -692,9 +692,9 @@ elif page == "ROC Analysis":
         """, unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PAGE 5 — EXPLAINABLE AI (SHAP)
+# PAGE 5 — EXPLAINABLE AI
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "Explainable AI":
+elif page == "Explainable AI (SHAP)":
     st.markdown('<h2 style="color:#e6edf3;">🧠 Explainable AI — SHAP Analysis</h2>', unsafe_allow_html=True)
     shap_model = st.selectbox("Select Model for SHAP Analysis", list(shap_values.keys()), index=0)
 
