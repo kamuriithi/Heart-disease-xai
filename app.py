@@ -266,14 +266,14 @@ with st.sidebar:
     page = st.radio(
         "## Navigation",
         [
-            "🏠 Dashboard Overview",
-            "🔮 Individual Prediction",
-            "📊 Model Performance",
-            "📈 ROC Analysis",
-            "🧠 Explainable AI (SHAP)",
-            "🗃️ Data Explorer",
-            "📖 About & Methods",
-            "🤖 AI Assistant"
+            "Dashboard Overview",
+            "Individual Prediction",
+            "Model Performance",
+            "ROC Analysis",
+            "Explainable AI (SHAP)",
+            "Data Explorer",
+            "About & Methods",
+            "AI Assistant"
         ],
         label_visibility="collapsed",
     )
@@ -294,7 +294,7 @@ with st.sidebar:
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 1 — DASHBOARD OVERVIEW
 # ══════════════════════════════════════════════════════════════════════════════
-if page == "🏠 Dashboard Overview":
+if page == "Dashboard Overview":
     # Header
     st.markdown("""
     <div class="header-banner">
@@ -334,7 +334,7 @@ if page == "🏠 Dashboard Overview":
     col_left, col_right = st.columns([3, 2])
 
     with col_left:
-        st.markdown('<div class="section-header">📋 Project Description</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"> Project Description</div>', unsafe_allow_html=True)
         st.markdown("""
         <div class="info-box">
         <p style='color:#c9d1d9;line-height:1.7;'>
@@ -403,12 +403,12 @@ if page == "🏠 Dashboard Overview":
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 2 — INDIVIDUAL PREDICTION
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "🔮 Individual Prediction":
-    st.markdown('<h2 style="color:#e6edf3;">🔮 Individual Patient Prediction</h2>', unsafe_allow_html=True)
+elif page == "Individual Prediction":
+    st.markdown('<h2 style="color:#e6edf3;"> Individual Patient Prediction</h2>', unsafe_allow_html=True)
     col_form, col_result = st.columns([2, 3])
 
     with col_form:
-        st.markdown('<div class="section-header">⚙️ Model & Patient Input</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"> Model & Patient Input</div>', unsafe_allow_html=True)
         sel_model = st.selectbox("Select Model", list(models.keys()), index=0)
 
         with st.expander("👤 Patient Demographics", expanded=True):
@@ -429,7 +429,7 @@ elif page == "🔮 Individual Prediction":
             fbs = st.selectbox("Fasting Blood Sugar >120 mg/dl", ["No (0)", "Yes (1)"])
             fbs_v = 1 if "Yes" in fbs else 0
 
-        with st.expander("📊 ECG & Imaging", expanded=True):
+        with st.expander("ECG & Imaging", expanded=True):
             rest_ecg = st.selectbox("Resting ECG Result", ["Normal (0)", "ST-T Abnormality (1)", "LV Hypertrophy (2)"])
             rest_ecg_v = int(rest_ecg.split("(")[1].replace(")", ""))
             slope = st.selectbox("ST Slope", ["Upsloping (1)", "Flat (2)", "Downsloping (3)"])
@@ -495,7 +495,7 @@ elif page == "🔮 Individual Prediction":
             st.markdown(bar_html, unsafe_allow_html=True)
 
             # Recommendations
-            st.markdown('<div class="section-header">💊 Clinical Recommendations</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-header"> Clinical Recommendations</div>', unsafe_allow_html=True)
             for rec in recommendations(prob):
                 st.markdown(f"""
                 <div style='background:#161b22;border:1px solid #30363d;border-radius:8px;
@@ -503,7 +503,7 @@ elif page == "🔮 Individual Prediction":
                 """, unsafe_allow_html=True)
 
             # SHAP waterfall
-            st.markdown('<div class="section-header">🧠 SHAP Explanation</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-header"> SHAP Explanation</div>', unsafe_allow_html=True)
             if sel_model in shap_values:
                 sv_data = shap_values[sel_model]
                 sv_arr = np.array(sv_data["values"])
@@ -545,7 +545,7 @@ elif page == "🔮 Individual Prediction":
         else:
             st.markdown("""
             <div style='text-align:center;padding:80px 40px;color:#8b949e;'>
-                <div style='font-size:3rem;'>🔮</div>
+                <div style='font-size:3rem;'></div>
                 <div style='font-size:1.1rem;margin-top:12px;'>
                    Fill in patient information and click <strong style='color:#3fb950;'>Predict Risk</strong>
                 </div>
@@ -554,11 +554,11 @@ elif page == "🔮 Individual Prediction":
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — MODEL PERFORMANCE
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "📊 Model Performance":
-    st.markdown('<h2 style="color:#e6edf3;">📊 Model Performance Comparison</h2>', unsafe_allow_html=True)
+elif page == "Model Performance":
+    st.markdown('<h2 style="color:#e6edf3;"> Model Performance Comparison</h2>', unsafe_allow_html=True)
     
     # Performance table
-    st.markdown('<div class="section-header">📋 Performance Summary Table</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Performance Summary Table</div>', unsafe_allow_html=True)
     perf_rows = []
     for m, v in sorted(metrics.items(), key=lambda x: x[1]["roc_auc"], reverse=True):
         perf_rows.append({
@@ -572,7 +572,7 @@ elif page == "📊 Model Performance":
     st.dataframe(pd.DataFrame(perf_rows), use_container_width=True, hide_index=True)
 
     # Grouped bar chart
-    st.markdown('<div class="section-header">📊 Metric Comparison Chart</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Metric Comparison Chart</div>', unsafe_allow_html=True)
     metric_keys = ["accuracy", "precision", "recall", "f1", "roc_auc"]
     metric_labels = ["Accuracy", "Precision", "Recall", "F1", "ROC-AUC"]
     model_names = list(metrics.keys())
@@ -600,7 +600,7 @@ elif page == "📊 Model Performance":
     plt.close(fig_bar)
 
     # Confusion matrices
-    st.markdown('<div class="section-header">🔲 Confusion Matrices</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Confusion Matrices</div>', unsafe_allow_html=True)
     cols_cm = st.columns(len(metrics))
     for idx, (mname, mval) in enumerate(metrics.items()):
         with cols_cm[idx]:
@@ -624,7 +624,7 @@ elif page == "📊 Model Performance":
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 4 — ROC ANALYSIS
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "📈 ROC Analysis":
+elif page == "ROC Analysis":
     st.markdown('<h2 style="color:#e6edf3;">📈 ROC Curve Analysis</h2>', unsafe_allow_html=True)
     col_roc, col_rank = st.columns([3, 2])
 
@@ -674,7 +674,7 @@ elif page == "📈 ROC Analysis":
                 </div>
             </div>""", unsafe_allow_html=True)
 
-        st.markdown('<div class="section-header">📚 ROC Interpretation</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"> ROC Interpretation</div>', unsafe_allow_html=True)
         st.markdown("""
         <div class='info-box' style='font-size:.84rem;line-height:1.8;color:#c9d1d9;'>
             <strong style='color:#58a6ff;'>ROC Curve</strong> plots Sensitivity vs. 1–Specificity
@@ -694,7 +694,7 @@ elif page == "📈 ROC Analysis":
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 5 — EXPLAINABLE AI (SHAP)
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "🧠 Explainable AI (SHAP)":
+elif page == "Explainable AI":
     st.markdown('<h2 style="color:#e6edf3;">🧠 Explainable AI — SHAP Analysis</h2>', unsafe_allow_html=True)
     shap_model = st.selectbox("Select Model for SHAP Analysis", list(shap_values.keys()), index=0)
 
@@ -703,8 +703,8 @@ elif page == "🧠 Explainable AI (SHAP)":
     base_val = sv_data["base_value"]
 
     tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Feature Importance", "🐝 SHAP Beeswarm",
-        "🌊 Individual Waterfall", "🔗 Dependence Plot"
+        "Feature Importance", "🐝 SHAP Beeswarm",
+        "Individual Waterfall", "Dependence Plot"
     ])
 
     # ── Tab 1: Feature Importance ──────────────────────────────────────────
@@ -861,7 +861,7 @@ elif page == "🧠 Explainable AI (SHAP)":
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 6 — DATA EXPLORER
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "🗃️ Data Explorer":
+elif page == "Data Explorer":
     st.markdown('<h2 style="color:#e6edf3;">🗃️ Interactive Data Explorer</h2>', unsafe_allow_html=True)
     df_e = df_orig.copy()
     df_e["HD_Label"] = df_e["HD"].map({0: "No CAD", 1: "CAD"})
@@ -900,7 +900,7 @@ elif page == "🗃️ Data Explorer":
                      height=320, hide_index=True)
 
     with col_dist:
-        st.markdown('<div class="section-header">📊 Feature Distribution</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header"> Feature Distribution</div>', unsafe_allow_html=True)
         num_feats = [c for c in feature_names if df_e[c].dtype in (float, np.float64, int, np.int64)]
         sel_feat = st.selectbox("Select Feature", num_feats, index=num_feats.index("Age"))
 
@@ -940,7 +940,7 @@ elif page == "🗃️ Data Explorer":
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 7 — ABOUT & METHODS
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "📖 About & Methods":
+elif page == "About & Methods":
     st.markdown('<h2 style="color:#e6edf3;">📖 About this System & Methodology</h2>', unsafe_allow_html=True)
     
     # Display Chuka University Logo
@@ -950,7 +950,7 @@ elif page == "📖 About & Methods":
     col1, col2 = st.columns(2)
 
     sections_left = [
-        ("📁 Dataset Information", """
+        ("Dataset Information", """
         <ul style='color:#c9d1d9;line-height:1.8;'>
             <li><strong>Source:</strong> UCI Heart Disease Dataset (Cleveland Clinic Foundation)</li>
             <li><strong>Sample size:</strong> 303 patients (299 after removing missing values)</li>
@@ -958,7 +958,7 @@ elif page == "📖 About & Methods":
             <li><strong>Target:</strong> HD — binary indicator of coronary artery disease (CAD)</li>
             <li><strong>Prevalence:</strong> ~46% positive cases</li>
         </ul>"""),
-        ("⚙️ Preprocessing Pipeline", """
+        ("Preprocessing Pipeline", """
         <ul style='color:#c9d1d9;line-height:1.8;'>
             <li><strong>Missing values:</strong> Rows with missing Ca or Thal dropped (n=4)</li>
             <li><strong>Categorical encoding:</strong> LabelEncoder for ChestPain and Thal</li>
@@ -966,7 +966,7 @@ elif page == "📖 About & Methods":
             <li><strong>Train-test split:</strong> 80/20 stratified by outcome</li>
             <li><strong>No data leakage:</strong> Scaler fit only on training set</li>
         </ul>"""),
-        ("🤖 Machine Learning Models", """
+        ("Machine Learning Models", """
         <ul style='color:#c9d1d9;line-height:1.8;'>
             <li><strong>Logistic Regression:</strong> Baseline linear classifier with L2 regularisation</li>
             <li><strong>K-Nearest Neighbours:</strong> Non-parametric, distance-based classifier</li>
@@ -977,7 +977,7 @@ elif page == "📖 About & Methods":
     ]
 
     sections_right = [
-        ("🧠 Explainable AI — SHAP", """
+        ("Explainable AI — SHAP", """
         <ul style='color:#c9d1d9;line-height:1.8;'>
             <li><strong>SHAP</strong> (SHapley Additive exPlanations) provides game-theoretically
            grounded feature attributions</li>
@@ -986,7 +986,7 @@ elif page == "📖 About & Methods":
            background data via k-means clustering</li>
             <li>Both global (population) and local (individual) explanations are supported</li>
         </ul>"""),
-        ("📏 Evaluation Framework", """
+        ("Evaluation Framework", """
         <ul style='color:#c9d1d9;line-height:1.8;'>
             <li><strong>Primary metric:</strong> ROC-AUC (discrimination across all thresholds)</li>
             <li><strong>Secondary metrics:</strong> Accuracy, Precision, Recall, F1 Score</li>
@@ -1034,7 +1034,7 @@ elif page == "📖 About & Methods":
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE 8 — AI ASSISTANT
 # ══════════════════════════════════════════════════════════════════════════════
-elif page == "🤖 AI Assistant":
+elif page == "AI Assistant":
     st.markdown('<h2 style="color:#e6edf3;">🤖 CardioXAI AI Assistant</h2>', unsafe_allow_html=True)
     st.markdown("""
     <div class='info-box' style='margin-bottom:18px;color:#c9d1d9;font-size:.9rem;line-height:1.7;'>
@@ -1043,7 +1043,7 @@ elif page == "🤖 AI Assistant":
     <strong style='color:#f0883e;'>how this dashboard works</strong>, or general
     <strong style='color:#d2a8ff;'>clinical cardiology questions</strong>.
     I act as a knowledgeable cardiovascular health assistant. <br><br>
-    ⚠️ <em>This assistant is for educational purposes only and does not replace professional medical advice.</em>
+    <em>This assistant is for educational purposes only and does not replace professional medical advice.</em>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1067,14 +1067,14 @@ elif page == "🤖 AI Assistant":
 
     # ── API key check ──────────────────────────────────────────────────────
     if not GROQ_API_KEY:
-        st.error("⚠️ Groq API key not found. "
+        st.error("Groq API key not found. "
                  "Add `GROQ_API_KEY = 'your_key'` to `.streamlit/secrets.toml` "
                  "or set the `GROQ_API_KEY` environment variable.",
                  icon="🔑")
         st.stop()
 
     # ── Quick-start suggestion buttons ─────────────────────────────────────
-    st.markdown('<div class="section-header">💡 Quick Questions</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Quick Questions</div>', unsafe_allow_html=True)
     suggestions = [
         "What are the main risk factors for heart disease?",
         "How does XGBoost predict heart disease?",
@@ -1131,7 +1131,7 @@ elif page == "🤖 AI Assistant":
                 )
                 st.rerun()
             except Exception as e:
-                st.error(f"❌ Groq API error: {e}")
+                st.error(f" Groq API error: {e}")
 
     # ── Chat input ─────────────────────────────────────────────────────────────
     st.markdown('<div class="section-header">💬 Ask a Question</div>', unsafe_allow_html=True)
