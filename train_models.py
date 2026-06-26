@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import argparse
 import warnings
@@ -18,34 +19,39 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 warnings.filterwarnings("ignore")
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data", type=str, required=True, help="Path to Heart.csv")
-    args = parser.parse_args()
+    # Check if running in Jupyter Notebook
+    if 'ipykernel' in sys.modules:
+        data_path = "Heart.csv"  # Default path when running in Jupyter
+    else:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--data", type=str, required=True, help="Path to Heart.csv")
+        args = parser.parse_args()
+        data_path = args.data
 
-    # Create models directory
-    model_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
+    # Create models directory (Fixed for Jupyter compatibility)
+    model_dir = os.path.join(os.getcwd(), "models")
     os.makedirs(model_dir, exist_ok=True)
 
     # Load data
-    df = pd.read_csv(args.data)
-    
-    # --- FIX: Drop the redundant 'AHD' column (it contains Yes/No strings, while 'HD' is our 0/1 target) ---
-    if "AHD" in df.columns:
-        df = df.drop(columns=["AHD"])
-    
+    df = pd.read_csv(data_path)
+
     # Save original data
     df.to_csv(os.path.join(model_dir, "original_data.csv"), index=False)
 
     # Handle missing values
     df = df.dropna(subset=["Ca", "Thal"])
-    
+
+    # Drop the 'AHD' column because it contains strings ('Yes'/'No') and is redundant with the 'HD' target
+    if "AHD" in df.columns:
+        df = df.drop(columns=["AHD"])
+
     # Encode categoricals
     le_chest = LabelEncoder()
     le_thal = LabelEncoder()
-    
+
     df["ChestPain"] = le_chest.fit_transform(df["ChestPain"])
     df["Thal"] = le_thal.fit_transform(df["Thal"])
-    
+
     # Save encoders
     joblib.dump(le_chest, os.path.join(model_dir, "le_chest.pkl"))
     joblib.dump(le_thal, os.path.join(model_dir, "le_thal.pkl"))
@@ -53,7 +59,7 @@ def main():
     # Target and features
     target = "HD"
     feature_names = [c for c in df.columns if c != target]
-    
+
     X = df[feature_names].values
     y = df[target].values
 
@@ -115,26 +121,38 @@ def main():
             "auc": roc_auc_score(y_test, y_prob)
         }
         
-        # SHAP values
+        # SHAP values (Fixed for modern SHAP versions)
         print(f"Calculating SHAP values for {name}...")
         if name in ["Random Forest", "XGBoost"]:
             explainer = shap.TreeExplainer(model)
             shap_vals = explainer.shap_values(X_test_scaled)
+            
+            # Handle both list (older SHAP) and array (newer SHAP) returns
             if isinstance(shap_vals, list): 
                 shap_vals = shap_vals[1]
+                
             base_val = explainer.expected_value
             if isinstance(base_val, np.ndarray):
                 base_val = float(base_val[1])
             else:
                 base_val = float(base_val)
         else:
-            background = shap.kmeans(X_train_scaled, 10)
+            # Replaced deprecated shap.kmeans with a simple data subset
+            background = X_train_scaled[:10] 
             explainer = shap.KernelExplainer(model.predict_proba, background)
+            
             sample_size = min(50, len(X_test_scaled))
             shap_vals = explainer.shap_values(X_test_scaled[:sample_size])
+            
             if isinstance(shap_vals, list):
                 shap_vals = shap_vals[1]
-            base_val = float(explainer.expected_value[1])
+                
+            # Safely extract base value whether it's an array or scalar
+            base_val = explainer.expected_value
+            if isinstance(base_val, np.ndarray):
+                base_val = float(base_val[1])
+            else:
+                base_val = float(base_val)
             
         shap_values_dict[name] = {
             "values": shap_vals.tolist() if hasattr(shap_vals, "tolist") else shap_vals,
