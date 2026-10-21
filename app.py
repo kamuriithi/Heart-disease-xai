@@ -14,7 +14,7 @@ from groq import Groq
 warnings.filterwarnings("ignore")
 
 # ── Config ────────────────────────────────────────────────────────────────
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL = "llama-3.3-70b-specdec"
 
 # Try secrets.toml first, then env var, then hardcoded fallback
 try:
